@@ -11,10 +11,10 @@ Use the ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN input values to configure the e
 	<string>com.github.ccaviness.pkg.elastic-agent</string>
 	<key>Input</key>
 	<dict>
-		<key>ELASTIC_URL</key>
-		<string/>
 		<key>ELASTIC_ENROLLMENT_TOKEN</key>
-		<string/>
+		<string></string>
+		<key>ELASTIC_URL</key>
+		<string></string>
 	</dict>
 	<key>MinimumVersion</key>
 	<string>2.3</string>
@@ -22,47 +22,45 @@ Use the ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN input values to configure the e
 	<string>com.github.ccaviness.download.elastic-agent</string>
 	<key>Process</key>
 	<array>
-        <dict>
-            <key>Arguments</key>
-            <dict>
-                <key>pattern</key>
-                <string>%pathname%</string>
-            </dict>
-            <key>Processor</key>
-            <string>FileFinder</string>
-        </dict>
-		<dict>
-			<key>Processor</key>
-			<string>PkgRootCreator</string>
-			<key>Arguments</key>
-            <dict>
-                <key>pkgroot</key>
-                <string>%RECIPE_CACHE_DIR%/%NAME%</string>
-                <key>pkgdirs</key>
-                <dict>
-                    <key>scripts</key>
-                    <string>0775</string>
-					<key>root</key>
-					<string>0775</string>
-                </dict>
-            </dict>
-		</dict>
-        <dict>
-            <key>Processor</key>
-            <string>Copier</string>
-            <key>Arguments</key>
-            <dict>
-                <key>source_path</key>
-                <string>%pathname%</string>
-                <key>destination_path</key>
-                <string>%pkgroot%/Scripts/elastic-agent.tar.gz</string>
-            </dict>
-        </dict>
 		<dict>
 			<key>Arguments</key>
 			<dict>
-				<key>file_path</key>
-				<string>%pkgroot%/Scripts/preinstall</string>
+				<key>pattern</key>
+				<string>%pathname%</string>
+			</dict>
+			<key>Processor</key>
+			<string>FileFinder</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>pkgdirs</key>
+				<dict>
+					<key>root</key>
+					<string>0775</string>
+					<key>scripts</key>
+					<string>0775</string>
+				</dict>
+				<key>pkgroot</key>
+				<string>%RECIPE_CACHE_DIR%/%NAME%</string>
+			</dict>
+			<key>Processor</key>
+			<string>PkgRootCreator</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>destination_path</key>
+				<string>%pkgroot%/Scripts/elastic-agent.tar.gz</string>
+				<key>source_path</key>
+				<string>%pathname%</string>
+			</dict>
+			<key>Processor</key>
+			<string>Copier</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
 				<key>file_content</key>
 				<string>#!/bin/bash
 
@@ -79,8 +77,10 @@ fi
 
 exit 0
 </string>
-                <key>file_mode</key>
-                <string>0755</string>
+				<key>file_mode</key>
+				<string>0755</string>
+				<key>file_path</key>
+				<string>%pkgroot%/Scripts/preinstall</string>
 			</dict>
 			<key>Processor</key>
 			<string>FileCreator</string>
@@ -88,8 +88,6 @@ exit 0
 		<dict>
 			<key>Arguments</key>
 			<dict>
-				<key>file_path</key>
-				<string>%pkgroot%/Scripts/postinstall</string>
 				<key>file_content</key>
 				<string>#!/bin/bash
 
@@ -110,32 +108,34 @@ rm -rf "${TEMPDIR}"
 
 exit 0
 </string>
-                <key>file_mode</key>
-                <string>0755</string>
+				<key>file_mode</key>
+				<string>0755</string>
+				<key>file_path</key>
+				<string>%pkgroot%/Scripts/postinstall</string>
 			</dict>
 			<key>Processor</key>
 			<string>FileCreator</string>
 		</dict>
-        <dict>
+		<dict>
 			<key>Arguments</key>
 			<dict>
-                <key>pkg_request</key>
-                <dict>
-					<key>pkgroot</key>
-					<string>%pkgroot%/root</string>
+				<key>pkg_request</key>
+				<dict>
+					<key>id</key>
+					<string>co.elastic.elastic-agent</string>
 					<key>pkgname</key>
 					<string>elastic-agent-%ELASTIC_VERSION%-%ELASTIC_ARCH%</string>
-                    <key>id</key>
-                    <string>co.elastic.elastic-agent</string>
-					<key>version</key>
-					<string>%ELASTIC_VERSION%</string>
+					<key>pkgroot</key>
+					<string>%pkgroot%/root</string>
 					<key>scripts</key>
 					<string>%pkgroot%/scripts</string>
+					<key>version</key>
+					<string>%ELASTIC_VERSION%</string>
 				</dict>
 			</dict>
 			<key>Processor</key>
 			<string>PkgCreator</string>
 		</dict>
-    </array>
+	</array>
 </dict>
 </plist>
