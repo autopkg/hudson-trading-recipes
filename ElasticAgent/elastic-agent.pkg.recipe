@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>Creates a pkg from the downloaded elastic-search archive.
+
+Use the ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN input values to configure the elastic-search enrollment settings.
+</string>
+	<key>Identifier</key>
+	<string>com.github.ccaviness.pkg.elastic-agent</string>
+	<key>Input</key>
+	<dict>
+		<key>ELASTIC_URL</key>
+		<string/>
+		<key>ELASTIC_ENROLLMENT_TOKEN</key>
+		<string/>
+	</dict>
+	<key>MinimumVersion</key>
+	<string>2.3</string>
+	<key>ParentRecipe</key>
+	<string>com.github.ccaviness.download.elastic-agent</string>
+	<key>Process</key>
+	<array>
+        <dict>
+            <key>Arguments</key>
+            <dict>
+                <key>pattern</key>
+                <string>%pathname%</string>
+            </dict>
+            <key>Processor</key>
+            <string>FileFinder</string>
+        </dict>
+		<dict>
+			<key>Processor</key>
+			<string>PkgRootCreator</string>
+			<key>Arguments</key>
+            <dict>
+                <key>pkgroot</key>
+                <string>%RECIPE_CACHE_DIR%/%NAME%</string>
+                <key>pkgdirs</key>
+                <dict>
+                    <key>scripts</key>
+                    <string>0775</string>
+					<key>root</key>
+					<string>0775</string>
+                </dict>
+            </dict>
+		</dict>
+        <dict>
+            <key>Processor</key>
+            <string>Copier</string>
+            <key>Arguments</key>
+            <dict>
+                <key>source_path</key>
+                <string>%pathname%</string>
+                <key>destination_path</key>
+                <string>%pkgroot%/Scripts/elastic-agent.tar.gz</string>
+            </dict>
+        </dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>file_path</key>
+				<string>%pkgroot%/Scripts/preinstall</string>
+				<key>file_content</key>
+				<string>#!/bin/bash
+
+set -e
+
+if [[ -x /Library/Elastic/Agent/elastic-agent ]]; then
+	echo "Attempting to uninstall existing Elastic Agent"
+	if ! /Library/Elastic/Agent/elastic-agent uninstall --force ; then
+		echo "Failed to uninstall Elastic Agent, attempting manual removal"
+		launchctl bootout system/co.elastic.agent || true
+		rm -rf /Library/Elastic/Agent
+	fi
+fi
+
+exit 0
+</string>
+                <key>file_mode</key>
+                <string>0755</string>
+			</dict>
+			<key>Processor</key>
+			<string>FileCreator</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>file_path</key>
+				<string>%pkgroot%/Scripts/postinstall</string>
+				<key>file_content</key>
+				<string>#!/bin/bash
+
+set -e
+
+TEMPDIR=$(mktemp -d)
+
+echo "Expanding elastic-agent archive..."
+/usr/bin/tar --directory "${TEMPDIR}" --strip-components 1 -xzf ./elastic-agent.tar.gz
+
+echo "Installing elastic-agent..."
+"${TEMPDIR}"/elastic-agent install \
+    --force \
+    --url=%ELASTIC_URL% \
+    --enrollment-token=%ELASTIC_ENROLLMENT_TOKEN%
+
+rm -rf "${TEMPDIR}"
+
+exit 0
+</string>
+                <key>file_mode</key>
+                <string>0755</string>
+			</dict>
+			<key>Processor</key>
+			<string>FileCreator</string>
+		</dict>
+        <dict>
+			<key>Arguments</key>
+			<dict>
+                <key>pkg_request</key>
+                <dict>
+					<key>pkgroot</key>
+					<string>%pkgroot%/root</string>
+					<key>pkgname</key>
+					<string>elastic-agent-%ELASTIC_VERSION%-%ELASTIC_ARCH%</string>
+                    <key>id</key>
+                    <string>co.elastic.elastic-agent</string>
+					<key>version</key>
+					<string>%ELASTIC_VERSION%</string>
+					<key>scripts</key>
+					<string>%pkgroot%/scripts</string>
+				</dict>
+			</dict>
+			<key>Processor</key>
+			<string>PkgCreator</string>
+		</dict>
+    </array>
+</dict>
+</plist>
