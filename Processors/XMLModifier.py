@@ -1,15 +1,13 @@
-# """"""
-# XMLModifier Module
-# This module provides a Processor class to modify XML files by performing specified
-# actions such as adding, removing, or changing elements.
+"""A Processor to modify XML files by adding, removing, or changing elements."""
+# pylint: disable=invalid-name
 #
 # Usage:
 #     The XMLModifier class expects two input variables:
 #         - xml_file: Path to the XML file to be modified.
-#         - actions: List of actions to perform on the XML file. Each action should be a
-#           dictionary with 'action' (add, remove, change), 'xpath', and 'value' (for
+#         - actions: List of actions to perform on the XML file. Each action should be
+#           a dictionary with 'action' (add, remove, change), 'xpath', and 'value' (for
 #           add/change).
-
+#
 #     Example:
 #         actions = [
 #             {"action": "remove", "xpath": ".//ElementToRemove"},
