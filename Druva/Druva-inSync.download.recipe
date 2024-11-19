@@ -5,13 +5,13 @@
         <key>Description</key>
         <string>Downloads the latest version the Druva inSync client.</string>
         <key>Identifier</key>
-        <string>com.github.ccaviness.download.Druva</string>
+        <string>com.github.ccaviness.download.Druva-inSync</string>
         <key>Input</key>
         <dict>
             <key>URL</key>
             <string>https://downloads.druva.com/insync/js/data.json</string>
             <key>NAME</key>
-            <string>inSync</string>
+            <string>Druva-inSync</string>
         </dict>
         <key>MinimumVersion</key>
         <string>2.3</string>
@@ -66,41 +66,6 @@
                 </dict>
                 <key>Processor</key>
                 <string>CodeSignatureVerifier</string>
-            </dict>
-            <dict>
-                <key>Arguments</key>
-                <dict>
-                    <key>destination_path</key>
-                    <string>%RECIPE_CACHE_DIR%/expanded</string>
-                    <key>flat_pkg_path</key>
-                    <string>%pkg_path%</string>
-                    <key>skip_payload</key>
-                    <false/>
-                </dict>
-                <key>Processor</key>
-                <string>FlatPkgUnpacker</string>
-            </dict>
-            <dict>
-                <key>Arguments</key>
-                <dict>
-                    <key>pattern</key>
-                    <string>%RECIPE_CACHE_DIR%/expanded/*.pkg</string>
-                </dict>
-                <key>Processor</key>
-                <string>FileFinder</string>
-            </dict>
-            <dict>
-                <key>Arguments</key>
-                <dict>
-                    <key>destination_path</key>
-                    <string>%RECIPE_CACHE_DIR%/unpack</string>
-                    <key>pkg_payload_path</key>
-                    <string>%found_filename%/Payload</string>
-                    <key>purge_destination</key>
-                    <true/>
-                </dict>
-                <key>Processor</key>
-                <string>PkgPayloadUnpacker</string>
             </dict>
             <dict>
                 <key>Arguments</key>

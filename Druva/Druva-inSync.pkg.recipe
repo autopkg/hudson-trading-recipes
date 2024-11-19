@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Description</key>
+        <string>Packages the latest version the Druva inSync client.</string>
+        <key>Identifier</key>
+        <string>com.github.ccaviness.pkg.Druva-inSync</string>
+        <key>Input</key>
+        <dict>
+            <key>INSYNC_CUSTOMIZATION_JSON</key>
+            <string/>
+        </dict>
+        <key>MinimumVersion</key>
+        <string>2.3</string>
+        <key>ParentRecipe</key>
+        <string>com.github.ccaviness.download.Druva-inSync</string>
+        <key>Process</key>
+        <array>
+            <dict>
+                <key>Arguments</key>
+                <dict>
+                    <key>destination_path</key>
+                    <string>%RECIPE_CACHE_DIR%/expanded</string>
+                    <key>flat_pkg_path</key>
+                    <string>%pkg_path%</string>
+                    <key>skip_payload</key>
+                    <false/>
+                </dict>
+                <key>Processor</key>
+                <string>FlatPkgUnpacker</string>
+            </dict>
+            <dict>
+                <key>Arguments</key>
+                <dict>
+                    <key>pattern</key>
+                    <string>%RECIPE_CACHE_DIR%/expanded/*.pkg</string>
+                </dict>
+                <key>Processor</key>
+                <string>FileFinder</string>
+            </dict>
+            <dict>
+                <key>Arguments</key>
+                <dict>
+                    <key>patch_string</key>
+                    <string>--- postinstall	2024-09-12 03:21:49
++++ postinstall.new	2024-11-19 14:23:11
+@@ -5,7 +5,7 @@
+ echo &quot;------------------------PostInstall Starts------------------&quot;
+ 
+ APP=&quot;/Applications/Druva inSync.app&quot;
+-CUSTOMIZATION_FILE_PATH=&quot;/Volumes/inSync/inSyncCustomizations.json&quot;
++CUSTOMIZATION_FILE_PATH=&quot;inSyncCustomizations.json&quot;
+ 
+ 
+ count=0
+</string>
+                    <key>target_file</key>
+                    <string>%found_filename%/Scripts/postinstall</string>
+                </dict>
+                <key>Processor</key>
+                <string>com.github.ccaviness.processors/FilePatcher</string>
+            </dict>
+            <dict>
+                <key>Arguments</key>
+                <dict>
+                    <key>file_path</key>
+                    <string>%found_filename%/Scripts/inSyncCustomizations.json</string>
+                    <key>file_content</key>
+                    <string>%INSYNC_CUSTOMIZATION_JSON%</string>
+                    <key>file_mode</key>
+                    <string>0644</string>
+                </dict>
+                <key>Processor</key>
+                <string>FileCreator</string>
+            </dict>
+            <dict>
+                <key>Arguments</key>
+                <dict>
+                    <key>pkgroot</key>
+                    <string>%RECIPE_CACHE_DIR%/pkgroot</string>
+                    <key>pkgdirs</key>
+                    <dict>
+                        <key>Applications</key>
+                        <string>0775</string>
+                    </dict>
+                </dict>
+                <key>Processor</key>
+                <string>PkgRootCreator</string>
+            </dict>
+            <dict>
+                <key>Arguments</key>
+                <dict>
+                    <key>destination_path</key>
+                    <string>%RECIPE_CACHE_DIR%/pkgroot/Applications</string>
+                    <key>pkg_payload_path</key>
+                    <string>%found_filename%/Payload</string>
+                    <key>purge_destination</key>
+                    <true/>
+                </dict>
+                <key>Processor</key>
+                <string>PkgPayloadUnpacker</string>
+            </dict>
+            <dict>
+                <key>Arguments</key>
+                <dict>
+                    <key>pkg_request</key>
+                    <dict>
+                        <key>pkgroot</key>
+                        <string>%RECIPE_CACHE_DIR%/pkgroot</string>
+                        <key>pkgname</key>
+                        <string>%NAME%-%version%</string>
+                        <key>id</key>
+                        <string>com.druva.insync.pkg</string>
+                        <key>scripts</key>
+                        <string>%found_filename%/Scripts</string>
+                        <key>version</key>
+                        <string>%version%</string>
+                        <key>chown</key>
+                        <array>
+                            <dict>
+                                <key>group</key>
+                                <string>admin</string>
+                                <key>path</key>
+                                <string>Applications</string>
+                                <key>user</key>
+                                <string>root</string>
+                            </dict>
+                        </array>
+                    </dict>
+                </dict>
+                <key>Processor</key>
+                <string>PkgCreator</string>
+            </dict>
+        </array>
+    </dict>
+</plist>
