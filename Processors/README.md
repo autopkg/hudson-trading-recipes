@@ -45,6 +45,9 @@ diff -Naur original_file modified_file > my_patch.patch
 This can be useful if you wish to make specific edits to a file, without replacing the
 file entirely.
 
+*IMPORTANT:* When using `patch_string`, the string should normally be XML-escaped, e.g. `<`
+replaced with `&lt;` etc.
+
 ### Example Usage
 
 `patch.diff`:
@@ -65,6 +68,8 @@ file entirely.
 \ No newline at end of file
 ```
 
+Using `patch_file`:
+
 ```xml
 <dict>
     <key>Arguments</key>
@@ -73,6 +78,35 @@ file entirely.
         <string>%RECIPE_CACHE_DIR%/unpack/PackageInfo</string>
         <key>patch_file</key>
         <string>/path/to/patch.diff</string>
+    </dict>
+    <key>Processor</key>
+    <string>com.github.ccaviness.processors/FilePatcher</string>
+</dict>
+```
+
+Using `patch_string`:
+
+```xml
+<dict>
+    <key>Arguments</key>
+    <dict>
+        <key>target_file</key>
+        <string>%RECIPE_CACHE_DIR%/unpack/PackageInfo</string>
+        <key>patch_string</key>
+        <string>--- unpack-orig/PackageInfo	2024-10-31 18:04:42
++++ unpack/PackageInfo	2024-10-31 15:45:21
+@@ -13,9 +13,6 @@
+     &lt;strict-identifier&gt;
+         &lt;bundle id=&quot;com.okta.mobile&quot;/&gt;
+     &lt;/strict-identifier&gt;
+-    &lt;relocate&gt;
+-        &lt;bundle id=&quot;com.okta.mobile&quot;/&gt;
+-    &lt;/relocate&gt;
+     &lt;scripts&gt;
+         &lt;postinstall file=&quot;./postinstall&quot;/&gt;
+     &lt;/scripts&gt;
+\ No newline at end of file
+</string>
     </dict>
     <key>Processor</key>
     <string>com.github.ccaviness.processors/FilePatcher</string>
