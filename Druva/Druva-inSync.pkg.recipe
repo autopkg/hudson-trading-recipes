@@ -3,7 +3,13 @@
 <plist version="1.0">
     <dict>
         <key>Description</key>
-        <string>Packages the latest version the Druva inSync client.</string>
+        <string>Packages the latest version the Druva inSync client.
+ 
+        Set `INSYNC_CUSTOMIZATION_JSON` to be the contents of you want the
+        `inSyncCustomizations.json` file to have. This will create a standalone .pkg
+        with the `inSyncCustomizations.json` file embedded inside.
+ 
+        See https://help.druva.com/en/articles/8702687-customize-insync-client-for-mac-devices</string>
         <key>Identifier</key>
         <string>com.github.ccaviness.pkg.Druva-inSync</string>
         <key>Input</key>
