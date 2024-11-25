@@ -47,7 +47,7 @@ class DruvaExtractor(URLGetter):
     }
 
     def main(self) -> None:
-        """some stuff"""
+        """Main function."""
         url: str = self.env.get("url")
         govcloud: bool = self.env.get("govcloud", False)
         response: str = self.download(url)
