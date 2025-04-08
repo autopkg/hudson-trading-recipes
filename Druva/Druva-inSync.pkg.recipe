@@ -26,6 +26,15 @@
             <dict>
                 <key>Arguments</key>
                 <dict>
+                    <key>predicate</key>
+                    <string>(INSYNC_CUSTOMIZATION_JSON == nil) OR (INSYNC_CUSTOMIZATION_JSON.length == 0)</string>
+                </dict>
+                <key>Processor</key>
+                <string>StopProcessingIf</string>
+            </dict>
+            <dict>
+                <key>Arguments</key>
+                <dict>
                     <key>destination_path</key>
                     <string>%RECIPE_CACHE_DIR%/expanded</string>
                     <key>flat_pkg_path</key>

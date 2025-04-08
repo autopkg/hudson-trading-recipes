@@ -43,6 +43,9 @@ class DruvaExtractor(URLGetter):
         "installer_version": {
             "description": "The installer version of the Druva package."
         },
+        "build_number": {
+            "description": "The build number of the Druva package."
+        },
         "download_url": {"description": "The name of the Druva package."},
     }
 
@@ -89,8 +92,14 @@ class DruvaExtractor(URLGetter):
                 f"Multiple packages found for version {latest_version}."
             )
 
-        self.env["version"] = package[0]["version"]
-        self.env["installer_version"] = package[0]["installerVersion"]
+        main_version = package[0]["version"]
+        full_version = package[0]["installerVersion"]
+        build_number = full_version.split("-")[-1] if "r" in full_version else None
+        if not build_number:
+            raise ProcessorError(
+                f"Failed to extract build number from installerVersion: {full_version}")
+        self.env["build_number"] = build_number
+        self.env["version"] = f"{main_version}-{build_number}"
         self.env["download_url"] = package[0]["downloadURL"]
 
 
