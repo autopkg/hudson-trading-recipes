@@ -3,8 +3,7 @@
 <plist version="1.0">
 	<dict>
 		<key>Description</key>
-		<string>Downloads the latest version the pre-enrolled enterprise Kolide launcher. You must
-			provide a Kolide API bearer token as `KOLIDE_TOKEN`.</string>
+		<string>Downloads the latest version the pre-enrolled enterprise Kolide launcher. You must provide a Kolide API bearer token as `KOLIDE_TOKEN`.</string>
 		<key>Identifier</key>
 		<string>com.github.ccaviness.download.Kolide</string>
 		<key>Input</key>

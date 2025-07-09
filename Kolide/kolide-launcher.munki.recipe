@@ -3,8 +3,7 @@
 <plist version="1.0">
 	<dict>
 		<key>Description</key>
-		<string>Downloads the latest version of enterprise Kolide launcher and imports into Munki as
-			a pkg.</string>
+		<string>Downloads the latest version of enterprise Kolide launcher and imports into Munki as a pkg.</string>
 		<key>Identifier</key>
 		<string>com.github.ccaviness.munki.Kolide</string>
 		<key>Input</key>
@@ -20,10 +19,7 @@
 				<key>category</key>
 				<string>Utilities</string>
 				<key>description</key>
-				<string>Kolide is a powerful tool to help your company reach its compliance goals
-					through the power of end-user self-remediation. We leverage the principles of
-					Zero Trust to block a device from accessing your company's SaaS apps and other
-					resources if it isn't running the Kolide agent or passing specific requirements.</string>
+				<string>Kolide is a powerful tool to help your company reach its compliance goals through the power of end-user self-remediation. We leverage the principles of Zero Trust to block a device from accessing your company's SaaS apps and other resources if it isn't running the Kolide agent or passing specific requirements.</string>
 				<key>developer</key>
 				<string>Kolide</string>
 				<key>display_name</key>
@@ -48,7 +44,7 @@
 					<key>additional_pkginfo</key>
 					<dict>
 						<key>blocking_applications</key>
-						<array/>
+						<array />
 						<key>installs</key>
 						<array>
 							<dict>
