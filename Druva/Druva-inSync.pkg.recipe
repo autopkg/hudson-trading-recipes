@@ -3,7 +3,7 @@
 <plist version="1.0">
     <dict>
         <key>Description</key>
-        <string>Packages the latest version the Druva inSync client.
+        <string>Packages the latest version of the Druva inSync client.
  
         Set `INSYNC_CUSTOMIZATION_JSON` to be the contents of you want the
         `inSyncCustomizations.json` file to have. This will create a standalone .pkg
@@ -147,6 +147,18 @@
                 <key>Processor</key>
                 <string>PkgCreator</string>
             </dict>
+			<dict>
+				<key>Arguments</key>
+				<dict>
+					<key>path_list</key>
+					<array>
+						<string>%RECIPE_CACHE_DIR%/expanded</string>
+						<string>%RECIPE_CACHE_DIR%/pkgroot</string>
+					</array>
+				</dict>
+				<key>Processor</key>
+				<string>PathDeleter</string>
+			</dict>
         </array>
     </dict>
 </plist>

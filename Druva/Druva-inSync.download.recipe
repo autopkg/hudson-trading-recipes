@@ -3,7 +3,7 @@
 <plist version="1.0">
     <dict>
         <key>Description</key>
-        <string>Downloads the latest version the Druva inSync client.</string>
+        <string>Downloads the latest version of the Druva inSync client.</string>
         <key>Identifier</key>
         <string>com.github.ccaviness.download.Druva-inSync</string>
         <key>Input</key>
@@ -47,7 +47,7 @@
                     <key>source_pkg</key>
                     <string>%pathname%/Install inSync.pkg</string>
                     <key>pkg_path</key>
-                    <string>%RECIPE_CACHE_DIR%/downloads/%NAME%-%version%.pkg</string>
+                    <string>%RECIPE_CACHE_DIR%/%NAME%-%version%.pkg</string>
                 </dict>
                 <key>Processor</key>
                 <string>PkgCopier</string>
@@ -66,17 +66,6 @@
                 </dict>
                 <key>Processor</key>
                 <string>CodeSignatureVerifier</string>
-            </dict>
-            <dict>
-                <key>Arguments</key>
-                <dict>
-                    <key>destination_path</key>
-                    <string>%RECIPE_CACHE_DIR%/%NAME%-%version%.pkg</string>
-                    <key>source_path</key>
-                    <string>%pkg_path%</string>
-                </dict>
-                <key>Processor</key>
-                <string>Copier</string>
             </dict>
         </array>
     </dict>

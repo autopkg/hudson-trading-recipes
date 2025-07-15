@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple/DTD PLIST 1.0//EN" "http://apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Description</key>
+        <string>Downloads, packages and imports into Munki latest version of the Druva inSync client.</string>
+        <key>Identifier</key>
+        <string>com.github.ccaviness.munki.Druva-inSync</string>
+        <key>Input</key>
+        <dict>
+            <key>DISPLAY_NAME</key>
+            <string>Druva inSync</string>
+            <key>MUNKI_CATEGORY</key>
+            <string>Utilities</string>
+            <key>MUNKI_REPO_SUBDIR</key>
+            <string>apps/%NAME%</string>
+            <key>pkginfo</key>
+            <dict>
+                <key>catalogs</key>
+                <array>
+                    <string>testing</string>
+                </array>
+                <key>category</key>
+                <string>%MUNKI_CATEGORY%</string>
+                <key>description</key>
+                <string>Druva provides integrated endpoint backup solutions, eDiscovery, and compliance monitoring to simplify end-user data protection, ensure regulatory compliance, and improve data visibility for the mobile workforce.</string>
+                <key>developer</key>
+                <string>Druva</string>
+                <key>display_name</key>
+                <string>%DISPLAY_NAME%</string>
+                <key>name</key>
+                <string>%NAME%</string>
+                <key>unattended_install</key>
+                <true />
+                <key>unattended_uninstall</key>
+                <true />
+                <key>uninstallable</key>
+                <true />
+            </dict>
+        </dict>
+        <key>ParentRecipe</key>
+        <string>com.github.ccaviness.pkg.Druva-inSync</string>
+        <key>MinimumVersion</key>
+        <string>2.3</string>
+        <key>Process</key>
+        <array>
+            <dict>
+                <key>Processor</key>
+                <string>MunkiImporter</string>
+                <key>Arguments</key>
+                <dict>
+                    <key>pkg_path</key>
+                    <string>%pkg_path%</string>
+                    <key>repo_subdirectory</key>
+                    <string>%MUNKI_REPO_SUBDIR%</string>
+                </dict>
+            </dict>
+        </array>
+    </dict>
+</plist>

@@ -38,7 +38,7 @@ class DruvaExtractor(URLGetter):
             "description": "Set to True to fetch the GovCloud version of the package.",
         },
     }
-    output_variables: dict = {
+    output_variables: dict[str, dict[str, str]] = {
         "version": {"description": "The version of the Druva package."},
         "installer_version": {
             "description": "The installer version of the Druva package."
