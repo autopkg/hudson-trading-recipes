@@ -30,6 +30,13 @@
 				<string>%NAME%</string>
 				<key>unattended_install</key>
 				<true />
+				<key>version_script</key>
+				<string><![CDATA[#!/bin/bash
+
+if [[ -e /usr/local/kolide-k2/Kolide.app/Contents/Info.plist ]]; then
+    plutil -extract CFBundleShortVersionString raw /usr/local/kolide-k2/Kolide.app/Contents/Info.plist | sed 's/^v//'
+fi]]>
+</string>
 			</dict>
 		</dict>
 		<key>MinimumVersion</key>
