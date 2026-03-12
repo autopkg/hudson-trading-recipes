@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>Downloads the latest Cyberhaven macOS installer via the Cyberhaven API.
+
+You must provide your tenant base URL as CYBERHAVEN_BASE_URL and an API access key as CYBERHAVEN_API_CREDENTIAL.</string>
+	<key>Identifier</key>
+	<string>com.github.ccaviness.download.Cyberhaven</string>
+	<key>Input</key>
+	<dict>
+		<key>CYBERHAVEN_API_CREDENTIAL</key>
+		<string>%CYBERHAVEN_API_CREDENTIAL%</string>
+		<key>CYBERHAVEN_BASE_URL</key>
+		<string>%CYBERHAVEN_BASE_URL%</string>
+		<key>NAME</key>
+		<string>Cyberhaven</string>
+	</dict>
+	<key>MinimumVersion</key>
+	<string>2.3</string>
+	<key>Process</key>
+	<array>
+		<dict>
+			<key>Processor</key>
+			<string>CyberhavenDownloadProvider</string>
+			<key>Arguments</key>
+			<dict>
+				<key>cyberhaven_api_credential</key>
+				<string>%CYBERHAVEN_API_CREDENTIAL%</string>
+				<key>cyberhaven_base_url</key>
+				<string>%CYBERHAVEN_BASE_URL%</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>Processor</key>
+			<string>EndOfCheckPhase</string>
+		</dict>
+		<dict>
+			<key>Processor</key>
+			<string>CodeSignatureVerifier</string>
+			<key>Arguments</key>
+			<dict>
+				<key>input_path</key>
+				<string>%pathname%</string>
+				<key>expected_authority_names</key>
+				<array>
+					<string>Developer ID Installer: CYBERHAVEN, INC (6KKW3K37TU)</string>
+					<string>Developer ID Certification Authority</string>
+					<string>Apple Root CA</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>

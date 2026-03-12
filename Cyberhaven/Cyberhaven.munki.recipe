@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>Downloads the latest Cyberhaven macOS installer via the Cyberhaven API and imports it into a Munki repo.
+
+You must provide your tenant base URL as CYBERHAVEN_BASE_URL and an API access key as CYBERHAVEN_API_CREDENTIAL.</string>
+	<key>Identifier</key>
+	<string>com.github.ccaviness.munki.Cyberhaven</string>
+	<key>Input</key>
+	<dict>
+		<key>MUNKI_CATEGORY</key>
+		<string>Security</string>
+		<key>MUNKI_REPO_SUBDIR</key>
+		<string>apps/cyberhaven</string>
+		<key>NAME</key>
+		<string>Cyberhaven</string>
+		<key>pkginfo</key>
+		<dict>
+			<key>catalogs</key>
+			<array>
+				<string>testing</string>
+			</array>
+			<key>category</key>
+			<string>%MUNKI_CATEGORY%</string>
+			<key>description</key>
+			<string>Cyberhaven endpoint agent for data detection and response.</string>
+			<key>developer</key>
+			<string>Cyberhaven</string>
+			<key>display_name</key>
+			<string>Cyberhaven</string>
+			<key>name</key>
+			<string>%NAME%</string>
+			<key>unattended_install</key>
+			<true/>
+		</dict>
+	</dict>
+	<key>MinimumVersion</key>
+	<string>2.3</string>
+	<key>ParentRecipe</key>
+	<string>com.github.ccaviness.download.Cyberhaven</string>
+	<key>Process</key>
+	<array>
+		<dict>
+			<key>Processor</key>
+			<string>MunkiPkginfoMerger</string>
+			<key>Arguments</key>
+			<dict>
+				<key>additional_pkginfo</key>
+				<dict>
+					<key>catalogs</key>
+					<array>
+						<string>testing</string>
+					</array>
+					<key>category</key>
+					<string>%MUNKI_CATEGORY%</string>
+					<key>description</key>
+					<string>Cyberhaven endpoint agent for data detection and response.</string>
+					<key>developer</key>
+					<string>Cyberhaven</string>
+					<key>display_name</key>
+					<string>Cyberhaven</string>
+					<key>name</key>
+					<string>%NAME%</string>
+					<key>unattended_install</key>
+					<true/>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>Processor</key>
+			<string>MunkiImporter</string>
+			<key>Arguments</key>
+			<dict>
+				<key>pkg_path</key>
+				<string>%pathname%</string>
+				<key>repo_subdirectory</key>
+				<string>%MUNKI_REPO_SUBDIR%</string>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>
