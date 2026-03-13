@@ -100,7 +100,6 @@ class CyberhavenDownloadProvider(URLGetter):
             json_data = json.loads(response_token)
             access_token = json_data["access_token"]
             self.output("Successfully acquired bearer token.", verbose_level=2)
-            self.output(f"Access Token: {access_token}", verbose_level=4)
         except (json.JSONDecodeError, KeyError) as e:
             raise ProcessorError(
                 f"Failed to parse bearer token from auth response: {e}"
