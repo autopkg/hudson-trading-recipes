@@ -28,7 +28,7 @@ class XMLModifier(Processor):
     description: str = (
         "Processor to remove, add, or change specified elements in an XML file."
     )
-    input_variables: dict[dict[bool, str]] = {
+    input_variables: dict[str, dict[str, str | bool]] = {
         "xml_file": {
             "required": True,
             "description": "Path to the XML file to be modified.",
@@ -60,7 +60,11 @@ class XMLModifier(Processor):
 
             if action_type == "remove":
                 for elem in root.findall(xpath):
-                    root.remove(elem)
+                    # Find the parent so we can remove nested elements (not just direct children of root)
+                    parent = root.find(xpath + "/..")
+                    if parent is None:
+                        parent = root
+                    parent.remove(elem)
             elif action_type == "add":
                 parent_xpath, tag = xpath.rsplit("/", 1)
                 parent = root.find(parent_xpath)
