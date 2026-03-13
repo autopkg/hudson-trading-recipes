@@ -40,9 +40,6 @@ class DruvaExtractor(URLGetter):
     }
     output_variables: dict[str, dict[str, str]] = {
         "version": {"description": "The version of the Druva package."},
-        "installer_version": {
-            "description": "The installer version of the Druva package."
-        },
         "build_number": {
             "description": "The build number of the Druva package."
         },
