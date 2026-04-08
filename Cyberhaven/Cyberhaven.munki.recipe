@@ -13,7 +13,7 @@ You must provide your tenant base URL as CYBERHAVEN_BASE_URL and an API access k
 		<key>MUNKI_CATEGORY</key>
 		<string>Security</string>
 		<key>MUNKI_REPO_SUBDIR</key>
-		<string>apps/cyberhaven</string>
+		<string>apps/%NAME%</string>
 		<key>NAME</key>
 		<string>Cyberhaven</string>
 		<key>pkginfo</key>
@@ -42,32 +42,6 @@ You must provide your tenant base URL as CYBERHAVEN_BASE_URL and an API access k
 	<string>com.github.ccaviness.download.Cyberhaven</string>
 	<key>Process</key>
 	<array>
-		<dict>
-			<key>Processor</key>
-			<string>MunkiPkginfoMerger</string>
-			<key>Arguments</key>
-			<dict>
-				<key>additional_pkginfo</key>
-				<dict>
-					<key>catalogs</key>
-					<array>
-						<string>testing</string>
-					</array>
-					<key>category</key>
-					<string>%MUNKI_CATEGORY%</string>
-					<key>description</key>
-					<string>Cyberhaven endpoint agent for data detection and response.</string>
-					<key>developer</key>
-					<string>Cyberhaven</string>
-					<key>display_name</key>
-					<string>Cyberhaven</string>
-					<key>name</key>
-					<string>%NAME%</string>
-					<key>unattended_install</key>
-					<true/>
-				</dict>
-			</dict>
-		</dict>
 		<dict>
 			<key>Processor</key>
 			<string>MunkiImporter</string>
