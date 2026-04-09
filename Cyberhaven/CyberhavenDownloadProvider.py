@@ -57,42 +57,87 @@ class CyberhavenDownloadProvider(URLGetter):
 
     def _fetch_access_token(self, refresh_token: str, base_url: str) -> str:
         token_url = f"{base_url}/public/v2/auth/token/access"
-        token_payload = json.dumps({"refresh_token": refresh_token})
 
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
         }
-        curl_opts = [
-            "--url",
-            token_url,
-            "--request",
-            "POST",
-            "--data",
-            token_payload,
+        payloads = [
+            {"refresh_token": refresh_token},
+            {"refreshToken": refresh_token},
         ]
 
-        try:
-            curl_cmd = self.prepare_curl_cmd()
-            self.add_curl_headers(curl_cmd, headers)
-            curl_cmd.extend(curl_opts)
-            response_token = self.download_with_curl(curl_cmd)
-        except Exception as e:
-            raise ProcessorError(
-                f"Failed to authenticate with the Cyberhaven API: {e}"
-            ) from e
+        last_error = "unknown auth response"
 
-        try:
-            if isinstance(response_token, bytes):
-                response_token = response_token.decode("utf-8")
-            json_data = json.loads(response_token)
-            access_token = str(json_data["access_token"])
-            self.output("Successfully acquired bearer token.", verbose_level=2)
-            return access_token
-        except (json.JSONDecodeError, KeyError) as e:
-            raise ProcessorError(
-                f"Failed to parse bearer token from auth response: {e}"
-            ) from e
+        for payload in payloads:
+            curl_opts = [
+                "--url",
+                token_url,
+                "--request",
+                "POST",
+                "--data",
+                json.dumps(payload),
+            ]
+
+            try:
+                curl_cmd = self.prepare_curl_cmd()
+                self.add_curl_headers(curl_cmd, headers)
+                curl_cmd.extend(curl_opts)
+                response_token = self.download_with_curl(curl_cmd)
+            except Exception as e:
+                raise ProcessorError(
+                    f"Failed to authenticate with the Cyberhaven API: {e}"
+                ) from e
+
+            try:
+                if isinstance(response_token, bytes):
+                    response_token = response_token.decode("utf-8")
+                json_data = json.loads(response_token)
+                if not isinstance(json_data, dict):
+                    last_error = "auth response was not a JSON object"
+                    continue
+
+                json_obj: dict[str, Any] = json_data
+                access_token_value: Any = (
+                    json_obj.get("access_token")
+                    or json_obj.get("accessToken")
+                    or json_obj.get("token")
+                )
+
+                data_obj = json_obj.get("data")
+                if not access_token_value and isinstance(data_obj, dict):
+                    access_token_value = (
+                        data_obj.get("access_token")
+                        or data_obj.get("accessToken")
+                        or data_obj.get("token")
+                    )
+
+                if access_token_value:
+                    access_token = str(access_token_value)
+                    self.output("Successfully acquired bearer token.", verbose_level=2)
+                    return access_token
+
+                error_hint_val = (
+                    json_obj.get("message")
+                    or json_obj.get("error")
+                    or json_obj.get("detail")
+                    or json_obj.get("errors")
+                )
+                error_hint = (
+                    str(error_hint_val) if error_hint_val else "unknown auth response"
+                )
+                available_keys = ", ".join(sorted(str(k) for k in json_obj.keys()))
+                last_error = f"{error_hint}. Keys: [{available_keys}]"
+            except json.JSONDecodeError as e:
+                raise ProcessorError(
+                    f"Failed to parse bearer token from auth response: {e}"
+                ) from e
+
+        raise ProcessorError(
+            "Failed to parse bearer token from auth response: "
+            "Auth response did not include an access token. "
+            f"Hint: {last_error}"
+        )
 
     def _download_installer(
         self, base_url: str, access_token: str, name: str, cache_dir: str
