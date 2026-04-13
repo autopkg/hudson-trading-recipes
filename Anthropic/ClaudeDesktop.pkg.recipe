@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>Description</key>
+		<string>Downloads the latest Claude Desktop DMG and creates a non-relocatable package.
+
+The vendor-provided PKG includes a relocate element that causes macOS to install
+Claude.app wherever an existing copy is found rather than /Applications. This recipe
+avoids that by building a fresh package from the app in the DMG.</string>
+		<key>Identifier</key>
+		<string>com.github.ccaviness.pkg.ClaudeDesktop</string>
+		<key>Input</key>
+		<dict>
+			<key>NAME</key>
+			<string>ClaudeDesktop</string>
+		</dict>
+		<key>MinimumVersion</key>
+		<string>2.3</string>
+		<key>ParentRecipe</key>
+		<string>com.github.kevinmcox.download.ClaudeDesktop</string>
+		<key>Process</key>
+		<array>
+			<dict>
+				<key>Processor</key>
+				<string>Copier</string>
+				<key>Arguments</key>
+				<dict>
+					<key>source_path</key>
+					<string>%pathname%/Claude.app</string>
+					<key>destination_path</key>
+					<string>%RECIPE_CACHE_DIR%/payload/Applications/Claude.app</string>
+					<key>overwrite</key>
+					<true/>
+				</dict>
+			</dict>
+			<dict>
+				<key>Processor</key>
+				<string>Versioner</string>
+				<key>Arguments</key>
+				<dict>
+					<key>input_plist_path</key>
+					<string>%RECIPE_CACHE_DIR%/payload/Applications/Claude.app/Contents/Info.plist</string>
+					<key>plist_version_key</key>
+					<string>CFBundleShortVersionString</string>
+				</dict>
+			</dict>
+			<dict>
+				<key>Processor</key>
+				<string>PkgCreator</string>
+				<key>Arguments</key>
+				<dict>
+					<key>pkg_request</key>
+					<dict>
+						<key>pkgroot</key>
+						<string>%RECIPE_CACHE_DIR%/payload</string>
+						<key>pkgname</key>
+						<string>%NAME%-%version%</string>
+						<key>id</key>
+						<string>com.anthropic.claudefordesktop</string>
+						<key>version</key>
+						<string>%version%</string>
+						<key>chown</key>
+						<array>
+							<dict>
+								<key>user</key>
+								<string>root</string>
+								<key>group</key>
+								<string>admin</string>
+								<key>path</key>
+								<string>Applications</string>
+							</dict>
+						</array>
+					</dict>
+				</dict>
+			</dict>
+			<dict>
+				<key>Processor</key>
+				<string>PathDeleter</string>
+				<key>Arguments</key>
+				<dict>
+					<key>path_list</key>
+					<array>
+						<string>%RECIPE_CACHE_DIR%/payload</string>
+					</array>
+				</dict>
+			</dict>
+		</array>
+	</dict>
+</plist>
