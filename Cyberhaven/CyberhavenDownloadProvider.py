@@ -209,7 +209,7 @@ class CyberhavenDownloadProvider(URLGetter):
                 "Headers received:\n" + header_content
             )
 
-        return version.rstrip("+")
+        return version
 
     def main(self) -> None:
         env: dict[str, Any] = self.env  # type: ignore[assignment]
