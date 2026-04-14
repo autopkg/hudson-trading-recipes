@@ -226,6 +226,7 @@ class CyberhavenDownloadProvider(URLGetter):
             )
 
         base_url = self._normalized_base_url(base_url)
+        self.output(f"Tenant URL: {base_url}", verbose_level=2)
         access_token = self._fetch_access_token(refresh_token, base_url)
 
         name = str(env.get("NAME", "Cyberhaven"))
@@ -237,21 +238,51 @@ class CyberhavenDownloadProvider(URLGetter):
         )
         os.makedirs(cache_dir, exist_ok=True)
 
+        # The Cyberhaven API (gRPC gateway) does not support HEAD requests or
+        # conditional headers (ETag / Last-Modified), so we must always
+        # download the full installer and compare against the cache afterward.
+        self.output("Downloading installer...", verbose_level=1)
         download_path, header_file = self._download_installer(
             base_url=base_url,
             access_token=access_token,
             name=name,
             cache_dir=cache_dir,
         )
+        download_size = os.path.getsize(download_path)
+        self.output(f"Download complete ({download_size} bytes).", verbose_level=2)
+
         version = self._extract_version_from_headers(header_file)
+        os.remove(header_file)
+        self.output(f"Installer version: {version}", verbose_level=1)
 
         final_path = os.path.join(cache_dir, f"{name}-{version}.pkg")
-        if os.path.exists(final_path):
-            os.remove(final_path)
-        os.rename(download_path, final_path)
-        os.remove(header_file)
 
-        self.output(f"Installer version: {version}", verbose_level=1)
+        # Compare against any previously cached copy of the same version.
+        if os.path.exists(final_path):
+            cached_size = os.path.getsize(final_path)
+            self.output(
+                f"Cached file exists: {final_path} ({cached_size} bytes)",
+                verbose_level=2,
+            )
+            if cached_size == download_size:
+                os.remove(download_path)
+                self.output(
+                    f"Installer unchanged (version {version}, "
+                    f"{cached_size} bytes), skipping.",
+                    verbose_level=1,
+                )
+                env["version"] = version
+                env["pathname"] = final_path
+                env["download_changed"] = False
+                return
+            self.output(
+                f"Size changed ({cached_size} -> {download_size} bytes), "
+                "replacing cached installer.",
+                verbose_level=2,
+            )
+            os.remove(final_path)
+
+        os.rename(download_path, final_path)
         self.output(f"Downloaded to: {final_path}", verbose_level=2)
 
         env["version"] = version
