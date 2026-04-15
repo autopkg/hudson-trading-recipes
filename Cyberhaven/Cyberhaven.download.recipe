@@ -10,10 +10,6 @@ You must provide your tenant base URL as CYBERHAVEN_BASE_URL and an API access k
 	<string>com.github.ccaviness.download.Cyberhaven</string>
 	<key>Input</key>
 	<dict>
-		<key>CYBERHAVEN_API_CREDENTIAL</key>
-		<string>%CYBERHAVEN_API_CREDENTIAL%</string>
-		<key>CYBERHAVEN_BASE_URL</key>
-		<string>%CYBERHAVEN_BASE_URL%</string>
 		<key>NAME</key>
 		<string>Cyberhaven</string>
 	</dict>
