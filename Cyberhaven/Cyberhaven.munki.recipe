@@ -32,6 +32,8 @@ You must provide your tenant base URL as CYBERHAVEN_BASE_URL and an API access k
 			<string>Cyberhaven</string>
 			<key>name</key>
 			<string>%NAME%</string>
+			<key>version</key>
+			<string>%version%</string>
 			<key>unattended_install</key>
 			<true/>
 		</dict>

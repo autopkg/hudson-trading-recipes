@@ -253,6 +253,16 @@ class CyberhavenDownloadProvider(URLGetter):
 
         version = self._extract_version_from_headers(header_file)
         os.remove(header_file)
+
+        # Strip build info (e.g. 26.01.03.24329-0de7ab+ -> 26.01.03.24329).
+        raw_version = version
+        version = version.split("-", 1)[0]
+        if version != raw_version:
+            self.output(
+                f"Stripped build info: {raw_version} -> {version}",
+                verbose_level=2,
+            )
+
         self.output(f"Installer version: {version}", verbose_level=1)
 
         final_path = os.path.join(cache_dir, f"{name}-{version}.pkg")
