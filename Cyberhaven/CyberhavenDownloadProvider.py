@@ -12,8 +12,10 @@
 #         - cyberhaven_base_url: Base URL for the Cyberhaven tenant
 #           (e.g. https://yourcompany.cyberhaven.io).
 #     The processor outputs the following variables:
-#         - version: Version of the latest macOS installer, extracted from the
-#           X-Installer-Version response header.
+#         - version: Version of the latest macOS installer, with build info
+#           stripped (e.g. 26.01.03.24329).
+#         - raw_version: Full version string before build-info stripping
+#           (e.g. 26.01.03.24329-0de7ab+).
 #         - pathname: Path to the downloaded installer pkg.
 
 import json
@@ -47,6 +49,12 @@ class CyberhavenDownloadProvider(URLGetter):
     }
     output_variables: ClassVar[dict[str, dict[str, str]]] = {
         "version": {"description": "Version of the latest macOS installer."},
+        "raw_version": {
+            "description": (
+                "Full version string before build-info stripping "
+                "(e.g. 26.01.03.24329-0de7ab+)."
+            ),
+        },
         "pathname": {"description": "Path to the downloaded installer pkg."},
     }
 
@@ -282,6 +290,7 @@ class CyberhavenDownloadProvider(URLGetter):
                     verbose_level=1,
                 )
                 env["version"] = version
+                env["raw_version"] = raw_version
                 env["pathname"] = final_path
                 env["download_changed"] = False
                 return
@@ -296,6 +305,7 @@ class CyberhavenDownloadProvider(URLGetter):
         self.output(f"Downloaded to: {final_path}", verbose_level=2)
 
         env["version"] = version
+        env["raw_version"] = raw_version
         env["pathname"] = final_path
         env["download_changed"] = True
 
