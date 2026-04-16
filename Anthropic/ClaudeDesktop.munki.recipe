@@ -16,6 +16,10 @@
 			<string>apps/%NAME%</string>
 			<key>pkginfo</key>
 			<dict>
+				<key>blocking_applications</key>
+				<array>
+					<string>Claude.app</string>
+				</array>
 				<key>catalogs</key>
 				<array>
 					<string>testing</string>
