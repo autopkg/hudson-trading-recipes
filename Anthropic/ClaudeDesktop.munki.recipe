@@ -16,10 +16,6 @@
 			<string>apps/%NAME%</string>
 			<key>pkginfo</key>
 			<dict>
-				<key>blocking_applications</key>
-				<array>
-					<string>Claude.app</string>
-				</array>
 				<key>catalogs</key>
 				<array>
 					<string>testing</string>
@@ -55,6 +51,27 @@ exit 0
 		<string>com.github.ccaviness.pkg.ClaudeDesktop</string>
 		<key>Process</key>
 		<array>
+			<dict>
+				<key>Processor</key>
+				<string>MunkiPkginfoMerger</string>
+				<key>Arguments</key>
+				<dict>
+					<key>additional_pkginfo</key>
+					<dict>
+						<key>installs</key>
+						<array>
+							<dict>
+								<key>CFBundleShortVersionString</key>
+								<string>%version%</string>
+								<key>path</key>
+								<string>/Applications/Claude.app</string>
+								<key>type</key>
+								<string>application</string>
+							</dict>
+						</array>
+					</dict>
+				</dict>
+			</dict>
 			<dict>
 				<key>Processor</key>
 				<string>MunkiImporter</string>
