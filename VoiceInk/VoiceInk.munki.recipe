@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Description</key>
-    <string>Downloads the latest version of VoiceInk and imports into Munki.</string>
+    <string>Downloads the latest VoiceInk disk image and imports into Munki.</string>
     <key>Identifier</key>
     <string>com.github.ScruffyInLondon.munki.VoiceInk</string>
     <key>Input</key>
@@ -59,7 +59,7 @@
             <key>Arguments</key>
             <dict>
                 <key>pkg_path</key>
-                <string>%RECIPE_CACHE_DIR%/%NAME%-%version%.pkg</string>
+                <string>%pathname%</string>
                 <key>repo_subdirectory</key>
                 <string>%MUNKI_REPO_SUBDIR%</string>
                 <key>version_comparison_key</key>
