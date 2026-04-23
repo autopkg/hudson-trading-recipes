@@ -5,7 +5,7 @@
     <key>Description</key>
     <string>Downloads the latest version of VoiceInk and imports into Munki.</string>
     <key>Identifier</key>
-    <string>com.github.ScruffyInLondon.munki.VoiceInk</string>
+    <string>com.github.ScruffyInLondon.munki.VoiceInk-pkg</string>
     <key>Input</key>
     <dict>
         <key>NAME</key>
