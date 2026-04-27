@@ -13,10 +13,6 @@ Use the ELASTIC_ARCH ('aarch64' or 'x86_64') and ELASTIC_VERSION input values to
 	<dict>
 		<key>DOWNLOAD_URL</key>
 		<string>https://artifacts.elastic.co/downloads/beats/elastic-agent</string>
-		<key>ELASTIC_ARCH</key>
-		<string></string>
-		<key>ELASTIC_VERSION</key>
-		<string></string>
 		<key>NAME</key>
 		<string>elastic-agent</string>
 	</dict>

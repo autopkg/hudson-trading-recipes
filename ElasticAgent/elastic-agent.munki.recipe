@@ -3,9 +3,9 @@
 <plist version="1.0">
 	<dict>
 		<key>Description</key>
-		<string>Uploads an elastic-agent pkg to munki.
+		<string>Uploads an elastic-agent pkg to Munki.
 
-Use the ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN input values to configure the elastic-search enrollment settings.
+Use the ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN input values to configure elastic-agent enrollment settings.
 Uses ELASTIC_VERSION from elastic-agent.download recipe to determine the version of the pkg.
 </string>
 		<key>Identifier</key>
@@ -41,10 +41,13 @@ Uses ELASTIC_VERSION from elastic-agent.download recipe to determine the version
 				<key>uninstall_method</key>
 				<string>uninstall_script</string>
 				<key>uninstall_script</key>
-				<string>#!/bin/bash
-/Library/Elastic/Agent/elastic-agent uninstall --force
+				<string><![CDATA[#!/bin/bash
+set -e
+if [[ -x /Library/Elastic/Agent/elastic-agent ]]; then
+    /Library/Elastic/Agent/elastic-agent uninstall --force || true
+fi
 exit 0
-				</string>
+]]></string>
 			</dict>
 		</dict>
 		<key>MinimumVersion</key>
@@ -61,35 +64,32 @@ exit 0
 						<key>version</key>
 						<string>%ELASTIC_VERSION%</string>
 						<key>installcheck_script</key>
-						<string>#!/bin/bash
+						<string><![CDATA[#!/bin/bash
 
 set -eu
 
 INSTALLED=1
 NOT_INSTALLED=0
-ELASTIC_AGENT=&quot;/Library/Elastic/Agent/elastic-agent&quot;
-ELASTIC_AGENT_VERSION_STRING=$(&quot;${ELASTIC_AGENT}&quot; version || echo &quot;Binary: 0.0&quot;)
-ELASTIC_AGENT_VERSION=$(awk '$1 == &quot;Binary:&quot; { print $2 }' &lt;&lt;&lt; &quot;${ELASTIC_AGENT_VERSION_STRING}&quot; || echo &quot;0.0&quot;)
-OFFERED_VERSION=&quot;%ELASTIC_VERSION%&quot;
+ELASTIC_AGENT="/Library/Elastic/Agent/elastic-agent"
+ELASTIC_AGENT_VERSION_STRING=$("${ELASTIC_AGENT}" version || echo "Binary: 0.0")
+ELASTIC_AGENT_VERSION=$(awk '$1 == "Binary:" { print $2 }' <<< "${ELASTIC_AGENT_VERSION_STRING}" || echo "0.0")
+OFFERED_VERSION="%ELASTIC_VERSION%"
 
-echo &quot;Elastic Agent version: ${ELASTIC_AGENT_VERSION}&quot;
-echo &quot;Offered version: ${OFFERED_VERSION}&quot;
+echo "Elastic Agent version: ${ELASTIC_AGENT_VERSION}"
+echo "Offered version: ${OFFERED_VERSION}"
 
-function version_gte() {
-    # shellcheck disable=SC2312
-    [[ &quot;$1&quot; == &quot;$2&quot; || &quot;$(printf '%s\n' &quot;$@&quot; | sort -V | head -n 1)&quot; != &quot;$1&quot; ]]
+version_gte() {
+    [[ "$1" == "$2" || "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1" ]]
 }
 
-# Non-zero exit codes indicate that the item in question is installed
-# shellcheck disable=SC2310
-if version_gte &quot;${ELASTIC_AGENT_VERSION}&quot; &quot;${OFFERED_VERSION}&quot;; then
-    echo &quot;Elastic Agent version is up-to-date&quot;
-    exit &quot;${INSTALLED}&quot;
+if version_gte "${ELASTIC_AGENT_VERSION}" "${OFFERED_VERSION}"; then
+    echo "Elastic Agent version is up-to-date"
+    exit "${INSTALLED}"
 else
-    echo &quot;Elastic Agent version is not up-to-date&quot;
-    exit &quot;${NOT_INSTALLED}&quot;
+    echo "Elastic Agent version is not up-to-date"
+    exit "${NOT_INSTALLED}"
 fi
-						</string>
+]]></string>
 					</dict>
 				</dict>
 				<key>Processor</key>
