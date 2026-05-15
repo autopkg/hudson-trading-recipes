@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>Downloads the latest version of WhatsApp, packages it, and imports it into Munki.
+		Based off of com.scriptingosx.munki.WhatsApp, but targets the pkg recipe instead of the download recipe.</string>
+	<key>Identifier</key>
+	<string>com.github.ccaviness.munki.WhatsApp</string>
+	<key>Input</key>
+	<dict>
+		<key>MUNKI_REPO_SUBDIR</key>
+		<string>apps/%NAME%</string>
+		<key>NAME</key>
+		<string>WhatsApp</string>
+		<key>pkginfo</key>
+		<dict>
+			<key>catalogs</key>
+			<array>
+				<string>testing</string>
+			</array>
+			<key>description</key>
+			<string>WhatsApp Messenger is a cross-platform mobile messaging app which allows you to exchange messages without having to pay for SMS. WhatsApp Messenger is available for iPhone, BlackBerry, Android, Windows Phone and Nokia and yes, those phones can all message each other! Because WhatsApp Messenger uses the same internet data plan that you use for email and web browsing, there is no cost to message and stay in touch with your friends.
+
+In addition to basic messaging WhatsApp users can create groups, send each other unlimited images, video and audio media messages.</string>
+			<key>developer</key>
+			<string>WhatsApp Inc.</string>
+			<key>display_name</key>
+			<string>WhatsApp</string>
+			<key>name</key>
+			<string>%NAME%</string>
+			<key>unattended_install</key>
+			<true/>
+			<key>unattended_uninstall</key>
+			<true/>
+		</dict>
+	</dict>
+	<key>MinimumVersion</key>
+	<string>2.3</string>
+	<key>ParentRecipe</key>
+	<string>com.scriptingosx.pkg.WhatsApp</string>
+	<key>Process</key>
+	<array>
+			<dict>
+				<key>Arguments</key>
+				<dict>
+					<key>additional_pkginfo</key>
+					<dict>
+						<key>installs</key>
+						<array>
+							<dict>
+								<key>path</key>
+								<string>/Applications/WhatsApp.app</string>
+								<key>type</key>
+								<string>application</string>
+								<key>CFBundleShortVersionString</key>
+								<string>%version%</string>
+							</dict>
+						</array>
+					</dict>
+				</dict>
+				<key>Processor</key>
+				<string>MunkiPkginfoMerger</string>
+			</dict>
+			<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>pkg_path</key>
+				<string>%pkg_path%</string>
+				<key>repo_subdirectory</key>
+				<string>%MUNKI_REPO_SUBDIR%</string>
+			</dict>
+			<key>Processor</key>
+			<string>MunkiImporter</string>
+		</dict>
+	</array>
+</dict>
+</plist>
