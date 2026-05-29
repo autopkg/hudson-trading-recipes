@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Description</key>
+    <string>Downloads the current release version of Ghostty and imports into Munki.
+            Based off of com.github.wardsparadox.munki.Ghostty, but targets the pkg recipe instead of the download recipe.
+    </string>
+    <key>Identifier</key>
+    <string>com.github.ccaviness.munki.Ghostty</string>
+    <key>Input</key>
+    <dict>
+        <key>NAME</key>
+        <string>Ghostty</string>
+        <key>MUNKI_REPO_SUBDIR</key>
+        <string>apps/Ghostty</string>
+        <key>MUNKI_CATEGORY</key>
+        <string>Productivity</string>
+        <key>pkginfo</key>
+        <dict>
+            <key>catalogs</key>
+            <array>
+                <string>testing</string>
+            </array>
+            <key>category</key>
+            <string>%MUNKI_CATEGORY%</string>
+            <key>description</key>
+                <string>Ghostty is a fast, feature-rich, and cross-platform terminal emulator that uses platform-native UI and GPU acceleration.</string>
+                <key>developer</key>
+                <string>Mitchell Hashimoto</string>
+                <key>display_name</key>
+                <string>Ghostty</string>
+                <key>name</key>
+                <string>%NAME%</string>
+                <key>unattended_install</key>
+                <true />
+            </dict>
+        </dict>
+        <key>MinimumVersion</key>
+        <string>1.0.4</string>
+        <key>ParentRecipe</key>
+        <string>com.github.autopkg.wardsparadox.pkg.Ghostty</string>
+        <key>Process</key>
+        <array>
+            <dict>
+                <key>Arguments</key>
+                <dict>
+                    <key>additional_pkginfo</key>
+                    <dict>
+                        <key>installs</key>
+                        <array>
+                            <dict>
+                                <key>path</key>
+                                <string>/Applications/Ghostty.app</string>
+                                <key>type</key>
+                                <string>application</string>
+                                <key>CFBundleShortVersionString</key>
+                                <string>%version%</string>
+                            </dict>
+                        </array>
+                    </dict>
+                </dict>
+                <key>Processor</key>
+                <string>MunkiPkginfoMerger</string>
+            </dict>
+            <dict>
+                <key>Processor</key>
+                <string>MunkiImporter</string>
+                <key>Arguments</key>
+                <dict>
+                    <key>pkg_path</key>
+                    <string>%pkg_path%</string>
+                    <key>repo_subdirectory</key>
+                    <string>%MUNKI_REPO_SUBDIR%</string>
+                </dict>
+            </dict>
+        </array>
+    </dict>
+</plist>
