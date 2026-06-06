@@ -17,7 +17,7 @@ import json
 try:
     from packaging.version import Version
 except ImportError:
-    from distutils.version import LooseVersion as Version
+    from autopkglib import APLooseVersion as Version
 from autopkglib import URLGetter, ProcessorError
 
 __all__ = ["DruvaExtractor"]
