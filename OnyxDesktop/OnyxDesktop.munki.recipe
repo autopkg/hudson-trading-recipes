@@ -31,7 +31,7 @@
     <key>MinimumVersion</key>
     <string>1.4</string>
     <key>ParentRecipe</key>
-    <string>com.github.ScruffyInLondon.download.Onyx</string>
+    <string>com.github.ScruffyInLondon.download.OnyxDesktop</string>
     <key>Process</key>
     <array>
         <dict>
