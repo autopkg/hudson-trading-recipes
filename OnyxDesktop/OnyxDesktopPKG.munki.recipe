@@ -5,7 +5,7 @@
     <key>Description</key>
     <string>File name for this recipe is incorrect, this file is depreciated in place of OnyxDesktop-pkg.munki.recipe</string>
     <key>Identifier</key>
-    <string>com.github.ScruffyInLondon.munki.OnyxDesktop-pkg</string>
+    <string>com.github.ScruffyInLondon.munki.OnyxDesktopPKG</string>
     <key>Input</key>
     <dict>
         <key>NAME</key>
