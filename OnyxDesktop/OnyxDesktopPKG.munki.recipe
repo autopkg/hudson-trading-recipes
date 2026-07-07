@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Description</key>
-    <string>Downloads the latest version of Onyx Desktop app, pacakges it, and imports into Munki.</string>
+    <string>File name for this recipe is incorrect, this file is depreciated in place of OnyxDesktop-pkg.munki.recipe</string>
     <key>Identifier</key>
     <string>com.github.ScruffyInLondon.munki.OnyxDesktop-pkg</string>
     <key>Input</key>
