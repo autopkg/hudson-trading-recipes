@@ -9,9 +9,9 @@
     <key>Input</key>
     <dict>
         <key>NAME</key>
-        <string>OnyxDesktop</string>
+        <string>Onyx</string>
         <key>MUNKI_REPO_SUBDIR</key>
-        <string>apps/OnyxDesktop</string>
+        <string>apps/Onyx</string>
         <key>pkginfo</key>
         <dict>
             <key>catalogs</key>
