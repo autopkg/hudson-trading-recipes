@@ -3,9 +3,9 @@
 <plist version="1.0">
 	<dict>
 		<key>Description</key>
-		<string>Downloads the current release version of IntelliJ IDEA and imports it into Munki as a PKG.</string>
+		<string>Downloads the current release version of IntelliJ IDEA and imports it into Munki as a pkg.</string>
 		<key>Identifier</key>
-		<string>com.github.ccaviness.munki.intellijidea-pkg</string>
+		<string>com.github.ccaviness.munki.intellijidea</string>
 		<key>Comment</key>
 		<string>For ARCH_TYPE use "mac" (Intel) or "macM1" (Apple Silicon). For SUPPORTED_ARCH use "x86_64" (Intel) or "arm64" (Apple Silicon). BOTH must be set.</string>
 		<key>Input</key>
