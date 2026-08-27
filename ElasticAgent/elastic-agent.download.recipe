@@ -3,16 +3,16 @@
 <plist version="1.0">
 <dict>
 	<key>Description</key>
-	<string>Downloads the specified version of elastic-agent.
+	<string>Downloads elastic-agent.
 
-Use the ELASTIC_ARCH ('aarch64' or 'x86_64') and ELASTIC_VERSION input values to configure the version of elastic-agent to download.
+If ELASTIC_VERSION is set, that exact version is downloaded. Otherwise the version and download source are resolved by querying Kibana's Fleet API (set KIBANA_URL and either KIBANA_API_KEY or KIBANA_USERNAME/KIBANA_PASSWORD). Use ELASTIC_ARCH ('aarch64' or 'x86_64') to select the build.
 </string>
 	<key>Identifier</key>
 	<string>com.github.ccaviness.download.elastic-agent</string>
 	<key>Input</key>
 	<dict>
-		<key>DOWNLOAD_URL</key>
-		<string>https://artifacts.elastic.co/downloads/beats/elastic-agent</string>
+		<key>KIBANA_URL</key>
+		<string></string>
 		<key>NAME</key>
 		<string>elastic-agent</string>
 	</dict>
@@ -21,10 +21,14 @@ Use the ELASTIC_ARCH ('aarch64' or 'x86_64') and ELASTIC_VERSION input values to
 	<key>Process</key>
 	<array>
 		<dict>
+			<key>Processor</key>
+			<string>com.github.ccaviness.processors/ElasticFleetVersionResolver</string>
+		</dict>
+		<dict>
 			<key>Arguments</key>
 			<dict>
 				<key>url</key>
-				<string>%DOWNLOAD_URL%/elastic-agent-%ELASTIC_VERSION%-darwin-%ELASTIC_ARCH%.tar.gz</string>
+				<string>%download_url%/elastic-agent-%ELASTIC_VERSION%-darwin-%ELASTIC_ARCH%.tar.gz</string>
 			</dict>
 			<key>Processor</key>
 			<string>URLDownloader</string>
