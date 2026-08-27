@@ -3,6 +3,62 @@
 These are [Autopkg Processors](https://github.com/autopkg/autopkg/wiki/Processors) to
 fill needs unmet by existing Processors.
 
+## ElasticFleetVersionResolver
+
+Resolves the elastic-agent `version` and `download_url` by querying Kibana's Fleet
+API. Lets a single download recipe either pin a specific version or follow
+whatever the ECK stack currently expects.
+
+### Input Variables
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `KIBANA_URL` | Yes | Base URL of the Kibana instance, no trailing slash. |
+| `KIBANA_API_KEY` | No | Sent as `Authorization: ApiKey <key>`. Preferred over basic auth. |
+| `KIBANA_USERNAME` | No | Basic-auth username (used when `KIBANA_API_KEY` is unset). |
+| `KIBANA_PASSWORD` | No | Basic-auth password. |
+| `ELASTIC_VERSION` | No | Explicit version override. Wins over any Kibana lookup. |
+| `AGENT_POLICY_ID` | No | If set, prefer this policy's `required_versions[0].version`. |
+| `ALLOW_SNAPSHOT` | No | If true, include `-SNAPSHOT` versions when picking the max. |
+
+### Output Variables
+
+| Name | Description |
+| --- | --- |
+| `version` | Resolved agent version, e.g. `9.3.3`. |
+| `ELASTIC_VERSION` | The same resolved version, set for compatibility with child recipes. |
+| `download_url` | Elastic Agent artifact base derived from the default `agent_download_sources` entry. |
+
+### Resolution Order
+
+1. If `ELASTIC_VERSION` is set and non-empty, use it.
+2. Else if `AGENT_POLICY_ID` is set and the policy has `required_versions`,
+   use `required_versions[0].version`.
+3. Else use the max of `GET /api/fleet/agents/available_versions`
+   (filtering `-SNAPSHOT` unless `ALLOW_SNAPSHOT` is true).
+
+`download_url` is derived from the default `GET /api/fleet/agent_download_sources`
+entry (or the first one, if none is marked default) by appending
+`beats/elastic-agent` to its host.
+
+### Example Usage
+
+```xml
+<dict>
+    <key>Processor</key>
+    <string>com.github.ccaviness.processors/ElasticFleetVersionResolver</string>
+</dict>
+<dict>
+    <key>Arguments</key>
+    <dict>
+        <key>url</key>
+        <string>%download_url%/elastic-agent-%ELASTIC_VERSION%-darwin-%ELASTIC_ARCH%.tar.gz</string>
+    </dict>
+    <key>Processor</key>
+    <string>URLDownloader</string>
+</dict>
+```
+
 ## XMLModifier
 
 This processor can be used to modify XML files by adding, removing, or changing
