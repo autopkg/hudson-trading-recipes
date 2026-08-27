@@ -11,8 +11,6 @@ If ELASTIC_VERSION is set, that exact version is downloaded. Otherwise the versi
 	<string>com.github.ccaviness.download.elastic-agent</string>
 	<key>Input</key>
 	<dict>
-		<key>KIBANA_URL</key>
-		<string></string>
 		<key>NAME</key>
 		<string>elastic-agent</string>
 	</dict>
