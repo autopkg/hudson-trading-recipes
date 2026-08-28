@@ -68,6 +68,7 @@ class TestResolver(unittest.TestCase):
 
         self.assertEqual(instance.env["version"], "9.1.1")
         self.assertEqual(instance.env["ELASTIC_VERSION"], "9.1.1")
+        self.assertEqual(instance.env["ELASTIC_ARCH"], "aarch64")
         self.assertEqual(
             instance.env["download_url"],
             "https://artifacts.elastic.co/downloads/beats/elastic-agent",
@@ -82,11 +83,13 @@ class TestResolver(unittest.TestCase):
             },
             KIBANA_URL="https://kibana.example.test",
             ELASTIC_VERSION="8.18.7",
+            ELASTIC_ARCH="x86_64",
         )
 
         instance.main()
 
         self.assertEqual(instance.env["ELASTIC_VERSION"], "8.18.7")
+        self.assertEqual(instance.env["ELASTIC_ARCH"], "x86_64")
         self.assertEqual(
             instance.env["download_url"],
             "https://mirror.test/root/beats/elastic-agent",

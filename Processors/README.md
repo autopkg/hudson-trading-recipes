@@ -18,6 +18,7 @@ whatever the ECK stack currently expects.
 | `KIBANA_USERNAME` | No | Basic-auth username (used when `KIBANA_API_KEY` is unset). |
 | `KIBANA_PASSWORD` | No | Basic-auth password. |
 | `ELASTIC_VERSION` | No | Explicit version override. Wins over any Kibana lookup. |
+| `ELASTIC_ARCH` | No | Agent architecture (`aarch64` or `x86_64`). Defaults to `aarch64`. |
 | `AGENT_POLICY_ID` | No | If set, prefer this policy's `required_versions[0].version`. |
 | `ALLOW_SNAPSHOT` | No | If true, include `-SNAPSHOT` versions when picking the max. |
 
@@ -27,6 +28,7 @@ whatever the ECK stack currently expects.
 | --- | --- |
 | `version` | Resolved agent version, e.g. `9.3.3`. |
 | `ELASTIC_VERSION` | The same resolved version, set for compatibility with child recipes. |
+| `ELASTIC_ARCH` | Configured architecture, defaulting to `aarch64`. |
 | `download_url` | Elastic Agent artifact base derived from the default `agent_download_sources` entry. |
 
 ### Resolution Order

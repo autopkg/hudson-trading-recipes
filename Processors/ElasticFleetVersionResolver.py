@@ -62,6 +62,13 @@ class ElasticFleetVersionResolver(URLGetter):
                 "is skipped for version selection."
             ),
         },
+        "ELASTIC_ARCH": {
+            "required": False,
+            "description": (
+                "Elastic Agent architecture ('aarch64' or 'x86_64'). Defaults to "
+                "'aarch64' when unset."
+            ),
+        },
         "AGENT_POLICY_ID": {
             "required": False,
             "description": (
@@ -78,6 +85,9 @@ class ElasticFleetVersionResolver(URLGetter):
         "version": {"description": "Resolved elastic-agent version, e.g. '9.3.3'."},
         "ELASTIC_VERSION": {
             "description": "Resolved version for compatibility with child recipes."
+        },
+        "ELASTIC_ARCH": {
+            "description": "Configured architecture, defaulting to 'aarch64'."
         },
         "download_url": {
             "description": (
@@ -176,6 +186,11 @@ class ElasticFleetVersionResolver(URLGetter):
     def main(self) -> None:
         if not (self.env.get("KIBANA_URL") or "").strip():
             raise ProcessorError("KIBANA_URL is required.")
+        architecture = (self.env.get("ELASTIC_ARCH") or "").strip()
+        if not architecture:
+            architecture = "aarch64"
+            self.output("ELASTIC_ARCH is unset; defaulting to aarch64.")
+        self.env["ELASTIC_ARCH"] = architecture
         version = self._resolve_version()
         self.env["version"] = version
         # Preserve the established recipe variable used by the pkg and Munki
