@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>Description</key>
-	<string>Creates a pkg from the downloaded elastic-agent archive.
+	<string>Creates an installer package from the Elastic Agent archive.
 
-Use the ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN input values to configure elastic-agent enrollment settings.
+Inherits version, architecture, and Kibana settings from com.github.ccaviness.download.elastic-agent.
+
+Set ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN to configure Elastic Agent enrollment.
 </string>
 	<key>Identifier</key>
 	<string>com.github.ccaviness.pkg.elastic-agent</string>

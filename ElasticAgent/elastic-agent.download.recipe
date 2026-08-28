@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>Description</key>
-	<string>Downloads elastic-agent.
+	<string>Downloads Elastic Agent.
 
-If ELASTIC_VERSION is set, that exact version is downloaded. Otherwise the version and download source are resolved by querying Kibana's Fleet API (set KIBANA_URL and either KIBANA_API_KEY or KIBANA_USERNAME/KIBANA_PASSWORD). Use ELASTIC_ARCH ('aarch64' or 'x86_64') to select the build.
+Queries Kibana's Fleet API for the configured download source and, unless ELASTIC_VERSION is set, the latest supported agent version.
+
+Set KIBANA_URL and either KIBANA_API_KEY or KIBANA_USERNAME/KIBANA_PASSWORD. ELASTIC_ARCH selects the 'aarch64' or 'x86_64' build and defaults to 'aarch64'.
 </string>
 	<key>Identifier</key>
 	<string>com.github.ccaviness.download.elastic-agent</string>

@@ -3,10 +3,11 @@
 <plist version="1.0">
 	<dict>
 		<key>Description</key>
-		<string>Uploads an elastic-agent pkg to Munki.
+		<string>Imports the Elastic Agent installer package into Munki.
 
-Use the ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN input values to configure elastic-agent enrollment settings.
-Uses ELASTIC_VERSION from elastic-agent.download recipe to determine the version of the pkg.
+Inherits version, architecture, and Kibana settings from com.github.ccaviness.download.elastic-agent, and enrollment settings from com.github.ccaviness.pkg.elastic-agent.
+
+Use MUNKI_CATEGORY and MUNKI_REPO_SUBDIR to configure the Munki import.
 </string>
 		<key>Identifier</key>
 		<string>com.github.ccaviness.munki.elastic-agent</string>
