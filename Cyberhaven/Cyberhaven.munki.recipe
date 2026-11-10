@@ -43,14 +43,10 @@ You must provide your tenant base URL as CYBERHAVEN_BASE_URL and an API access k
 	<key>Process</key>
 	<array>
 		<dict>
-			<key>Processor</key>
-			<string>MunkiPkginfoMerger</string>
 			<key>Arguments</key>
 			<dict>
 				<key>additional_pkginfo</key>
 				<dict>
-					<key>version</key>
-					<string>%version%</string>
 					<key>installs</key>
 					<array>
 						<dict>
@@ -62,12 +58,14 @@ You must provide your tenant base URL as CYBERHAVEN_BASE_URL and an API access k
 							<string>application</string>
 						</dict>
 					</array>
+					<key>version</key>
+					<string>%version%</string>
 				</dict>
 			</dict>
+			<key>Processor</key>
+			<string>MunkiPkginfoMerger</string>
 		</dict>
 		<dict>
-			<key>Processor</key>
-			<string>MunkiImporter</string>
 			<key>Arguments</key>
 			<dict>
 				<key>pkg_path</key>
@@ -75,6 +73,8 @@ You must provide your tenant base URL as CYBERHAVEN_BASE_URL and an API access k
 				<key>repo_subdirectory</key>
 				<string>%MUNKI_REPO_SUBDIR%</string>
 			</dict>
+			<key>Processor</key>
+			<string>MunkiImporter</string>
 		</dict>
 	</array>
 </dict>
