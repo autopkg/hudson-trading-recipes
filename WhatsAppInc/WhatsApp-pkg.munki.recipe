@@ -41,28 +41,28 @@ In addition to basic messaging WhatsApp users can create groups, send each other
 	<string>com.scriptingosx.pkg.WhatsApp</string>
 	<key>Process</key>
 	<array>
+		<dict>
+			<key>Arguments</key>
 			<dict>
-				<key>Arguments</key>
+				<key>additional_pkginfo</key>
 				<dict>
-					<key>additional_pkginfo</key>
-					<dict>
-						<key>installs</key>
-						<array>
-							<dict>
-								<key>path</key>
-								<string>/Applications/WhatsApp.app</string>
-								<key>type</key>
-								<string>application</string>
-								<key>CFBundleShortVersionString</key>
-								<string>%version%</string>
-							</dict>
-						</array>
-					</dict>
+					<key>installs</key>
+					<array>
+						<dict>
+							<key>CFBundleShortVersionString</key>
+							<string>%version%</string>
+							<key>path</key>
+							<string>/Applications/WhatsApp.app</string>
+							<key>type</key>
+							<string>application</string>
+						</dict>
+					</array>
 				</dict>
-				<key>Processor</key>
-				<string>MunkiPkginfoMerger</string>
 			</dict>
-			<dict>
+			<key>Processor</key>
+			<string>MunkiPkginfoMerger</string>
+		</dict>
+		<dict>
 			<key>Arguments</key>
 			<dict>
 				<key>pkg_path</key>
