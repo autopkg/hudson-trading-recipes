@@ -62,7 +62,16 @@ git -C "$target_repo" fetch upstream
 git -C "$target_repo" switch "$target_branch"
 git -C "$target_repo" merge --ff-only "upstream/$target_branch"
 git -C "$target_repo" switch -c "$migration_branch"
+
+(
+    cd "$target_repo"
+    pre-commit install
+)
 ```
+
+Installing the hook is required once per clone. The
+`.pre-commit-config.yaml` file defines the checks but does not install the Git
+hook.
 
 Export only the commits and changes affecting the recipe directory, then replay
 them in the destination repository:
@@ -74,7 +83,10 @@ git -C "$source_repo" format-patch \
     --output-directory "$migration_work" \
     -- "$recipe_dir"
 
-git -C "$target_repo" am --3way "$migration_work"/*.patch
+git -C "$target_repo" am \
+    --3way \
+    --committer-date-is-author-date \
+    "$migration_work"/*.patch
 ```
 
 The `recipe_dir` pathspec is recursive. It includes every tracked file under
@@ -83,10 +95,13 @@ binary icons. `--binary` includes binary file changes, and the patches retain
 Git file modes such as the executable bit.
 
 `format-patch` records the author name, author email, author date, commit
-message, and binary changes for each matching commit. `git am` replays those
-patches in the destination, so commit hashes and committer metadata change.
-Limiting the patches to `recipe_dir` keeps unrelated source-repository history
-out of the destination.
+message, and binary changes for each matching commit. It does not record the
+original committer date. `--committer-date-is-author-date` prevents the replayed
+commits from appearing to have been created on the migration date. The exact
+original committer identity and date are not retained when they differ from
+the author metadata. Commit hashes also change because the commits have new
+parents. Limiting the patches to `recipe_dir` keeps unrelated
+source-repository history out of the destination.
 
 If a patch conflicts, resolve it and run
 `git -C "$target_repo" am --continue`. Run
@@ -115,7 +130,40 @@ moved from another path, include each old path in the export. Do not use this
 procedure when important changes exist only in merge commits because
 `format-patch` does not reproduce those merges.
 
-## 2. Change identifiers in the migrated copy
+## 2. Check and normalize the imported files
+
+`git am` does not run the normal pre-commit hook. Run every repository check
+explicitly before changing identifiers:
+
+```bash
+(
+    cd "$target_repo"
+    pre-commit run --all-files
+)
+```
+
+A formatting hook may modify files and return a failure on the first run.
+Review its changes, then rerun the checks until they pass:
+
+```bash
+git -C "$target_repo" status --short
+git -C "$target_repo" diff
+
+(
+    cd "$target_repo"
+    pre-commit run --all-files
+)
+```
+
+If the hooks changed imported files, commit those changes separately from the
+identifier changes:
+
+```bash
+git -C "$target_repo" add "$recipe_dir"
+git -C "$target_repo" commit -m "Normalize imported $recipe_dir files"
+```
+
+## 3. Change identifiers in the migrated copy
 
 Change identifiers in a new commit after importing the history. Change each
 HRT-owned identifier from, for example:
@@ -143,7 +191,7 @@ git -C "$target_repo" add "$recipe_dir"
 git -C "$target_repo" commit -m "Use HRT identifiers for $recipe_dir recipes"
 ```
 
-## 3. Validate and publish the migrated recipes
+## 4. Validate and publish the migrated recipes
 
 Run the repository checks and review the branch:
 
@@ -167,7 +215,7 @@ not test downloads, signatures, custom processors, or Munki imports.
 Merge the destination pull request before deprecating the old recipes. The
 warning will then name a replacement that users can fetch.
 
-## 4. Deprecate the originals
+## 5. Deprecate the originals
 
 Create a separate branch in the source repository. Add `DeprecationWarning` as
 the first processor in each old recipe, with a message naming its exact
@@ -204,7 +252,7 @@ git -C "$source_repo" commit -m "Deprecate $recipe_dir recipes"
 git -C "$source_repo" push -u origin "$deprecation_branch"
 ```
 
-## 5. Update downstream consumers
+## 6. Update downstream consumers
 
 After the migration is merged:
 
