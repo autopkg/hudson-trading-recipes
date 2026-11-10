@@ -1,71 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-	<dict>
-		<key>Description</key>
-		<string>Imports the Elastic Agent installer package into Munki.
+<dict>
+	<key>Description</key>
+	<string>Imports the Elastic Agent installer package into Munki.
 
 Inherits version, architecture, and Kibana settings from com.github.ccaviness.download.elastic-agent, and enrollment settings from com.github.ccaviness.pkg.elastic-agent.
 
 Use MUNKI_CATEGORY and MUNKI_REPO_SUBDIR to configure the Munki import.
 </string>
-		<key>Identifier</key>
-		<string>com.github.ccaviness.munki.elastic-agent</string>
-		<key>Input</key>
+	<key>Identifier</key>
+	<string>com.github.ccaviness.munki.elastic-agent</string>
+	<key>Input</key>
+	<dict>
+		<key>DERIVE_MIN_OS</key>
+		<string>YES</string>
+		<key>MUNKI_CATEGORY</key>
+		<string>Security</string>
+		<key>MUNKI_REPO_SUBDIR</key>
+		<string>apps/elastic-agent</string>
+		<key>pkginfo</key>
 		<dict>
-			<key>MUNKI_CATEGORY</key>
-			<string>Security</string>
-			<key>MUNKI_REPO_SUBDIR</key>
-			<string>apps/elastic-agent</string>
-			<key>DERIVE_MIN_OS</key>
-			<string>YES</string>
-			<key>pkginfo</key>
-			<dict>
-				<key>catalogs</key>
-				<array>
-					<string>testing</string>
-				</array>
-				<key>category</key>
-				<string>%MUNKI_CATEGORY%</string>
-				<key>description</key>
-				<string>Elastic Agent is a single, unified way to add monitoring for logs, metrics, and other types of data to a host.</string>
-				<key>developer</key>
-				<string>Elasticsearch, Inc</string>
-				<key>display_name</key>
-				<string>Elastic Agent</string>
-				<key>name</key>
-				<string>%NAME%</string>
-				<key>unattended_install</key>
-				<true/>
-				<key>unattended_uninstall</key>
-				<true/>
-				<key>uninstall_method</key>
-				<string>uninstall_script</string>
-				<key>uninstall_script</key>
-				<string><![CDATA[#!/bin/bash
+			<key>catalogs</key>
+			<array>
+				<string>testing</string>
+			</array>
+			<key>category</key>
+			<string>%MUNKI_CATEGORY%</string>
+			<key>description</key>
+			<string>Elastic Agent is a single, unified way to add monitoring for logs, metrics, and other types of data to a host.</string>
+			<key>developer</key>
+			<string>Elasticsearch, Inc</string>
+			<key>display_name</key>
+			<string>Elastic Agent</string>
+			<key>name</key>
+			<string>%NAME%</string>
+			<key>unattended_install</key>
+			<true/>
+			<key>unattended_uninstall</key>
+			<true/>
+			<key>uninstall_method</key>
+			<string>uninstall_script</string>
+			<key>uninstall_script</key>
+			<string>#!/bin/bash
 set -e
 if [[ -x /Library/Elastic/Agent/elastic-agent ]]; then
     /Library/Elastic/Agent/elastic-agent uninstall --force || true
 fi
 exit 0
-]]></string>
-			</dict>
+</string>
 		</dict>
-		<key>MinimumVersion</key>
-		<string>2.7</string>
-		<key>ParentRecipe</key>
-		<string>com.github.ccaviness.pkg.elastic-agent</string>
-		<key>Process</key>
-		<array>
+	</dict>
+	<key>MinimumVersion</key>
+	<string>2.7</string>
+	<key>ParentRecipe</key>
+	<string>com.github.ccaviness.pkg.elastic-agent</string>
+	<key>Process</key>
+	<array>
+		<dict>
+			<key>Arguments</key>
 			<dict>
-				<key>Arguments</key>
+				<key>additional_pkginfo</key>
 				<dict>
-					<key>additional_pkginfo</key>
-					<dict>
-						<key>version</key>
-						<string>%ELASTIC_VERSION%</string>
-						<key>installcheck_script</key>
-						<string><![CDATA[#!/bin/bash
+					<key>installcheck_script</key>
+					<string>#!/bin/bash
 
 set -eu
 
@@ -73,7 +71,7 @@ INSTALLED=1
 NOT_INSTALLED=0
 ELASTIC_AGENT="/Library/Elastic/Agent/elastic-agent"
 ELASTIC_AGENT_VERSION_STRING=$("${ELASTIC_AGENT}" version || echo "Binary: 0.0")
-ELASTIC_AGENT_VERSION=$(awk '$1 == "Binary:" { print $2 }' <<< "${ELASTIC_AGENT_VERSION_STRING}" || echo "0.0")
+ELASTIC_AGENT_VERSION=$(awk '$1 == "Binary:" { print $2 }' &lt;&lt;&lt; "${ELASTIC_AGENT_VERSION_STRING}" || echo "0.0")
 OFFERED_VERSION="%ELASTIC_VERSION%"
 
 echo "Elastic Agent version: ${ELASTIC_AGENT_VERSION}"
@@ -90,23 +88,25 @@ else
     echo "Elastic Agent version is not up-to-date"
     exit "${NOT_INSTALLED}"
 fi
-]]></string>
-					</dict>
+</string>
+					<key>version</key>
+					<string>%ELASTIC_VERSION%</string>
 				</dict>
-				<key>Processor</key>
-				<string>MunkiPkginfoMerger</string>
 			</dict>
+			<key>Processor</key>
+			<string>MunkiPkginfoMerger</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
 			<dict>
-				<key>Arguments</key>
-				<dict>
-					<key>pkg_path</key>
-					<string>%pkg_path%</string>
-					<key>repo_subdirectory</key>
-					<string>%MUNKI_REPO_SUBDIR%</string>
-				</dict>
-				<key>Processor</key>
-				<string>MunkiImporter</string>
+				<key>pkg_path</key>
+				<string>%pkg_path%</string>
+				<key>repo_subdirectory</key>
+				<string>%MUNKI_REPO_SUBDIR%</string>
 			</dict>
-		</array>
-	</dict>
+			<key>Processor</key>
+			<string>MunkiImporter</string>
+		</dict>
+	</array>
+</dict>
 </plist>

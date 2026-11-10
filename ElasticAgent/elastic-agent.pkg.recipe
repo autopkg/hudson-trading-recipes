@@ -12,7 +12,7 @@ Set ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN to configure Elastic Agent enrollme
 	<key>Identifier</key>
 	<string>com.github.ccaviness.pkg.elastic-agent</string>
 	<key>Input</key>
-	<dict />
+	<dict/>
 	<key>MinimumVersion</key>
 	<string>2.3</string>
 	<key>ParentRecipe</key>
@@ -59,11 +59,11 @@ Set ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN to configure Elastic Agent enrollme
 			<key>Arguments</key>
 			<dict>
 				<key>file_content</key>
-				<string><![CDATA[#!/bin/bash
+				<string>#!/bin/bash
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" &amp;&amp; pwd)"
 ARCHIVE="${SCRIPT_DIR}/elastic-agent.tar.gz"
 TEMPDIR=$(/usr/bin/mktemp -d)
 trap 'rm -rf "${TEMPDIR}"' EXIT
@@ -78,7 +78,7 @@ echo "Installing elastic-agent..."
     "--enrollment-token=%ELASTIC_ENROLLMENT_TOKEN%"
 
 exit 0
-]]></string>
+</string>
 				<key>file_mode</key>
 				<string>0755</string>
 				<key>file_path</key>
