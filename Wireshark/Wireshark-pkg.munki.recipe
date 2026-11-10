@@ -49,12 +49,12 @@
 					<key>installs</key>
 					<array>
 						<dict>
+							<key>CFBundleShortVersionString</key>
+							<string>%version%</string>
 							<key>path</key>
 							<string>/Applications/Wireshark.app</string>
 							<key>type</key>
 							<string>application</string>
-							<key>CFBundleShortVersionString</key>
-							<string>%version%</string>
 						</dict>
 					</array>
 				</dict>
