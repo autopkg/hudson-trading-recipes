@@ -7,7 +7,7 @@
 
 You must provide your tenant base URL as CYBERHAVEN_BASE_URL and an API access key as CYBERHAVEN_API_CREDENTIAL.</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.munki.Cyberhaven</string>
+	<string>com.github.hudson-trading.munki.Cyberhaven</string>
 	<key>Input</key>
 	<dict>
 		<key>MUNKI_CATEGORY</key>
@@ -39,7 +39,7 @@ You must provide your tenant base URL as CYBERHAVEN_BASE_URL and an API access k
 	<key>MinimumVersion</key>
 	<string>2.3</string>
 	<key>ParentRecipe</key>
-	<string>com.github.ccaviness.download.Cyberhaven</string>
+	<string>com.github.hudson-trading.download.Cyberhaven</string>
 	<key>Process</key>
 	<array>
 		<dict>
