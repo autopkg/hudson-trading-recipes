@@ -1,72 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-    <dict>
-        <key>Description</key>
-        <string>Downloads the latest version of the Druva inSync client.</string>
-        <key>Identifier</key>
-        <string>com.github.ccaviness.download.Druva-inSync</string>
-        <key>Input</key>
-        <dict>
-            <key>URL</key>
-            <string>https://downloads.druva.com/insync/js/data.json</string>
-            <key>NAME</key>
-            <string>Druva-inSync</string>
-        </dict>
-        <key>MinimumVersion</key>
-        <string>2.3</string>
-        <key>Process</key>
-        <array>
-            <dict>
-                <key>Arguments</key>
-                <dict>
-                    <key>url</key>
-                    <string>%URL%</string>
-                </dict>
-                <key>Processor</key>
-                <string>DruvaExtractor</string>
-            </dict>
-            <dict>
-                <key>Arguments</key>
-                <dict>
-                    <key>filename</key>
-                    <string>%NAME%-%version%.dmg</string>
-                    <key>url</key>
-                    <string>%download_url%</string>
-                </dict>
-                <key>Processor</key>
-                <string>URLDownloader</string>
-            </dict>
-            <dict>
-                <key>Processor</key>
-                <string>EndOfCheckPhase</string>
-            </dict>
-            <dict>
-                <key>Arguments</key>
-                <dict>
-                    <key>source_pkg</key>
-                    <string>%pathname%/Install inSync.pkg</string>
-                    <key>pkg_path</key>
-                    <string>%RECIPE_CACHE_DIR%/%NAME%-%version%.pkg</string>
-                </dict>
-                <key>Processor</key>
-                <string>PkgCopier</string>
-            </dict>
-            <dict>
-                <key>Arguments</key>
-                <dict>
-                    <key>expected_authority_names</key>
-                    <array>
-                        <string>Developer ID Installer: Druva Technologies PTE LTD (JN6HK3RMAP)</string>
-                        <string>Developer ID Certification Authority</string>
-                        <string>Apple Root CA</string>
-                    </array>
-                    <key>input_path</key>
-                    <string>%pkg_path%</string>
-                </dict>
-                <key>Processor</key>
-                <string>CodeSignatureVerifier</string>
-            </dict>
-        </array>
-    </dict>
+<dict>
+	<key>Description</key>
+	<string>Downloads the latest version of the Druva inSync client.</string>
+	<key>Identifier</key>
+	<string>com.github.ccaviness.download.Druva-inSync</string>
+	<key>Input</key>
+	<dict>
+		<key>NAME</key>
+		<string>Druva-inSync</string>
+		<key>URL</key>
+		<string>https://downloads.druva.com/insync/js/data.json</string>
+	</dict>
+	<key>MinimumVersion</key>
+	<string>2.3</string>
+	<key>Process</key>
+	<array>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>url</key>
+				<string>%URL%</string>
+			</dict>
+			<key>Processor</key>
+			<string>DruvaExtractor</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>filename</key>
+				<string>%NAME%-%version%.dmg</string>
+				<key>url</key>
+				<string>%download_url%</string>
+			</dict>
+			<key>Processor</key>
+			<string>URLDownloader</string>
+		</dict>
+		<dict>
+			<key>Processor</key>
+			<string>EndOfCheckPhase</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>pkg_path</key>
+				<string>%RECIPE_CACHE_DIR%/%NAME%-%version%.pkg</string>
+				<key>source_pkg</key>
+				<string>%pathname%/Install inSync.pkg</string>
+			</dict>
+			<key>Processor</key>
+			<string>PkgCopier</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>expected_authority_names</key>
+				<array>
+					<string>Developer ID Installer: Druva Technologies PTE LTD (JN6HK3RMAP)</string>
+					<string>Developer ID Certification Authority</string>
+					<string>Apple Root CA</string>
+				</array>
+				<key>input_path</key>
+				<string>%pkg_path%</string>
+			</dict>
+			<key>Processor</key>
+			<string>CodeSignatureVerifier</string>
+		</dict>
+	</array>
+</dict>
 </plist>
