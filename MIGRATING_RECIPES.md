@@ -1,0 +1,225 @@
+# Migrating recipes
+
+This guide moves an HRT-owned recipe directory from another AutoPkg recipe
+repository into `autopkg/hudson-trading-recipes`. The commands retain the
+commits that changed the directory, then give the copied recipes HRT
+identifiers. A directory may contain one or more recipes, custom processors,
+scripts, icons, and other supporting files.
+
+## Before starting
+
+- Confirm that the recipes were created for HRT and that their copyright and
+  license permit the move.
+- Review the directory's complete Git history, not only its current files.
+  Earlier versions will become public, so check them for credentials, internal
+  URLs, customer names, and other private information.
+- Identify every recipe, custom processor, icon, and parent relationship that
+  must move together. Confirm that every file being migrated is under the
+  selected directory. Handle shared files outside the directory separately.
+- Commit all intended source changes. The history import only includes
+  committed changes.
+- Start with clean source and destination working trees.
+- These commands assume that the destination repository uses `upstream` for
+  `autopkg/hudson-trading-recipes` and `origin` for the contributor's fork.
+  They assume that the source repository uses `origin` for its GitHub remote.
+  Check both repositories with `git remote -v` before starting.
+
+## 1. Import the directory and its history
+
+Replace these placeholder values for each migration. Create a temporary
+directory for the generated patch series:
+
+```bash
+source_repo=/path/to/source-recipes
+target_repo=/path/to/hudson-trading-recipes
+source_branch=main
+target_branch=main
+recipe_dir=RecipeName
+recipe_file=RecipeName.download.recipe  # One file used to inspect history.
+old_namespace=com.github.source-owner
+migration_branch=migrate-recipe-name
+deprecation_branch=deprecate-recipe-name
+migration_work=$(mktemp -d)
+
+git -C "$source_repo" status --short --branch
+git -C "$target_repo" status --short --branch
+git -C "$source_repo" remote -v
+git -C "$target_repo" remote -v
+git -C "$source_repo" ls-files -- "$recipe_dir"
+git -C "$source_repo" log --oneline -- "$recipe_dir"
+test ! -e "$target_repo/$recipe_dir"
+```
+
+Update the source branch, then create a destination branch from the current
+upstream branch:
+
+```bash
+git -C "$source_repo" fetch origin
+git -C "$source_repo" switch "$source_branch"
+git -C "$source_repo" merge --ff-only "origin/$source_branch"
+
+git -C "$target_repo" fetch upstream
+git -C "$target_repo" switch "$target_branch"
+git -C "$target_repo" merge --ff-only "upstream/$target_branch"
+git -C "$target_repo" switch -c "$migration_branch"
+```
+
+Export only the commits and changes affecting the recipe directory, then replay
+them in the destination repository:
+
+```bash
+git -C "$source_repo" format-patch \
+    --root \
+    --binary \
+    --output-directory "$migration_work" \
+    -- "$recipe_dir"
+
+git -C "$target_repo" am --3way "$migration_work"/*.patch
+```
+
+The `recipe_dir` pathspec is recursive. It includes every tracked file under
+the directory, including multiple recipes, processors, scripts, symlinks, and
+binary icons. `--binary` includes binary file changes, and the patches retain
+Git file modes such as the executable bit.
+
+`format-patch` records the author name, author email, author date, commit
+message, and binary changes for each matching commit. `git am` replays those
+patches in the destination, so commit hashes and committer metadata change.
+Limiting the patches to `recipe_dir` keeps unrelated source-repository history
+out of the destination.
+
+If a patch conflicts, resolve it and run
+`git -C "$target_repo" am --continue`. Run
+`git -C "$target_repo" am --abort` to abandon the import.
+
+Check the result before making migration-specific edits:
+
+```bash
+git -C "$target_repo" status --short
+git -C "$target_repo" log --oneline -- "$recipe_dir"
+git -C "$target_repo" log --follow -- "$recipe_dir/$recipe_file"
+git -C "$target_repo" diff --stat "upstream/$target_branch...HEAD"
+diff \
+    <(git -C "$source_repo" ls-tree -r "$source_branch" -- "$recipe_dir") \
+    <(git -C "$target_repo" ls-tree -r HEAD -- "$recipe_dir")
+```
+
+The final `diff` compares each path, object type, file mode, and blob hash
+before migration-specific edits. No output means that the imported directory
+matches the source branch.
+
+Git does not track empty directories, and this procedure does not include
+untracked files or files outside `recipe_dir`. Git LFS objects and submodules
+need additional migration steps. If the directory or a file within it was
+moved from another path, include each old path in the export. Do not use this
+procedure when important changes exist only in merge commits because
+`format-patch` does not reproduce those merges.
+
+## 2. Change identifiers in the migrated copy
+
+Change identifiers in a new commit after importing the history. Change each
+HRT-owned identifier from, for example:
+
+```text
+com.github.source-owner.download.RecipeName
+com.github.source-owner.munki.RecipeName
+```
+
+to:
+
+```text
+com.github.hudson-trading.download.RecipeName
+com.github.hudson-trading.munki.RecipeName
+```
+
+Update HRT-owned `ParentRecipe` references and any other references to the old
+identifiers. Do not rename third-party parent identifiers. Search the directory
+for the old namespace before committing:
+
+```bash
+rg -n --fixed-strings "$old_namespace" "$target_repo/$recipe_dir"
+git -C "$target_repo" diff
+git -C "$target_repo" add "$recipe_dir"
+git -C "$target_repo" commit -m "Use HRT identifiers for $recipe_dir recipes"
+```
+
+## 3. Validate and publish the migrated recipes
+
+Run the repository checks and review the branch:
+
+```bash
+(
+    cd "$target_repo"
+    pre-commit run --all-files
+)
+git -C "$target_repo" status --short
+git -C "$target_repo" diff --check "upstream/$target_branch...HEAD"
+git -C "$target_repo" log --stat "upstream/$target_branch..HEAD"
+git -C "$target_repo" push -u origin "$migration_branch"
+```
+
+On macOS, run `plutil -lint` against every migrated plist recipe. Test the
+recipes from the feature branch on the AutoPkg test system. Store required
+credentials outside the repository, for example in AutoPkg preferences. Do
+not commit them or pass them on the command line. Lint and pre-commit checks do
+not test downloads, signatures, custom processors, or Munki imports.
+
+Merge the destination pull request before deprecating the old recipes. The
+warning will then name a replacement that users can fetch.
+
+## 4. Deprecate the originals
+
+Create a separate branch in the source repository. Add `DeprecationWarning` as
+the first processor in each old recipe, with a message naming its exact
+replacement:
+
+```bash
+git -C "$source_repo" fetch origin
+git -C "$source_repo" switch "$source_branch"
+git -C "$source_repo" merge --ff-only "origin/$source_branch"
+git -C "$source_repo" switch -c "$deprecation_branch"
+```
+
+```xml
+<dict>
+    <key>Arguments</key>
+    <dict>
+        <key>message</key>
+        <string>This recipe is deprecated; use com.github.hudson-trading.download.RecipeName instead.</string>
+    </dict>
+    <key>Processor</key>
+    <string>DeprecationWarning</string>
+</dict>
+```
+
+Use the exact replacement identifier in each recipe. A deprecated Munki recipe,
+for example, should name its corresponding
+`com.github.hudson-trading.munki.RecipeName` identifier. Commit and push this
+on a separate source-repository branch:
+
+```bash
+git -C "$source_repo" diff --check
+git -C "$source_repo" add "$recipe_dir"
+git -C "$source_repo" commit -m "Deprecate $recipe_dir recipes"
+git -C "$source_repo" push -u origin "$deprecation_branch"
+```
+
+## 5. Update downstream consumers
+
+After the migration is merged:
+
+1. Add `autopkg/hudson-trading-recipes` to the consumer's repository list.
+2. Change overrides to use the new parent identifiers.
+3. Review the complete parent and custom-processor diff.
+4. Regenerate trust information only after that review.
+5. Run a focused test on the macOS AutoPkg test system before deploying the
+   change.
+
+Keep the source repository available while other recipes or downstream
+consumers still depend on it.
+
+## Recipe format
+
+Do not combine plist-to-YAML conversion with the initial migration. If the
+project adopts YAML, convert the recipes in a separate commit or pull request.
+Reviewers can then distinguish the identifier changes from the format changes.
