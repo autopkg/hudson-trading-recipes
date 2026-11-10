@@ -22,7 +22,7 @@ Set KIBANA_URL and either KIBANA_API_KEY or KIBANA_USERNAME/KIBANA_PASSWORD. ELA
 	<array>
 		<dict>
 			<key>Processor</key>
-			<string>com.github.ccaviness.processors/ElasticFleetVersionResolver</string>
+			<string>ElasticFleetVersionResolver</string>
 		</dict>
 		<dict>
 			<key>Arguments</key>
