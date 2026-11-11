@@ -6,7 +6,7 @@
 	<string>Builds Wireshark and imports into a Munki repo.
 			Based off of com.homebysix.munki.Wireshark, but targets the pkg recipe instead of the download recipe.</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.munki.Wireshark</string>
+	<string>com.github.hudson-trading.munki.Wireshark</string>
 	<key>Input</key>
 	<dict>
 		<key>MUNKI_REPO_SUBDIR</key>
