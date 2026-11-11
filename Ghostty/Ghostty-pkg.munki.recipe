@@ -7,7 +7,7 @@
             Based off of com.github.wardsparadox.munki.Ghostty, but targets the pkg recipe instead of the download recipe.
     </string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.munki.Ghostty</string>
+	<string>com.github.hudson-trading.munki.Ghostty</string>
 	<key>Input</key>
 	<dict>
 		<key>MUNKI_CATEGORY</key>
