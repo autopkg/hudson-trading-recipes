@@ -11,7 +11,7 @@ The package will no longer be signed after this modification.
 This recipe is based off of nstrauss' excellent OktaVerify.pkg recipe:
 https://github.com/autopkg/nstrauss-recipes/blob/master/Okta%20Verify/OktaVerify.pkg.recipe</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.pkg.OktaVerifyNoRelocate</string>
+	<string>com.github.hudson-trading.pkg.OktaVerifyNoRelocate</string>
 	<key>Input</key>
 	<dict>
 		<key>NAME</key>

@@ -10,7 +10,7 @@ Set the DERIVE_MIN_OS variable to a non-empty string to set the minimum_os_versi
 This recipe is based off of nstrauss' excellent OktaVerify.munki recipe:
 https://github.com/autopkg/nstrauss-recipes/blob/master/Okta%20Verify/OktaVerify.munki.recipe</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.munki.OktaVerifyNoRelocate</string>
+	<string>com.github.hudson-trading.munki.OktaVerifyNoRelocate</string>
 	<key>Input</key>
 	<dict>
 		<key>DERIVE_MIN_OS</key>
@@ -57,7 +57,7 @@ exit 0
 	<key>MinimumVersion</key>
 	<string>2.7</string>
 	<key>ParentRecipe</key>
-	<string>com.github.ccaviness.pkg.OktaVerifyNoRelocate</string>
+	<string>com.github.hudson-trading.pkg.OktaVerifyNoRelocate</string>
 	<key>Process</key>
 	<array>
 		<dict>
