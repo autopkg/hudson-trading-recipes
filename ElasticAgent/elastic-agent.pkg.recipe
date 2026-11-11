@@ -5,18 +5,18 @@
 	<key>Description</key>
 	<string>Creates an installer package from the Elastic Agent archive.
 
-Inherits version, architecture, and Kibana settings from com.github.ccaviness.download.elastic-agent.
+Inherits version, architecture, and Kibana settings from com.github.hudson-trading.download.elastic-agent.
 
 Set ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN to configure Elastic Agent enrollment.
 </string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.pkg.elastic-agent</string>
+	<string>com.github.hudson-trading.pkg.elastic-agent</string>
 	<key>Input</key>
 	<dict/>
 	<key>MinimumVersion</key>
 	<string>2.3</string>
 	<key>ParentRecipe</key>
-	<string>com.github.ccaviness.download.elastic-agent</string>
+	<string>com.github.hudson-trading.download.elastic-agent</string>
 	<key>Process</key>
 	<array>
 		<dict>

@@ -5,12 +5,12 @@
 	<key>Description</key>
 	<string>Imports the Elastic Agent installer package into Munki.
 
-Inherits version, architecture, and Kibana settings from com.github.ccaviness.download.elastic-agent, and enrollment settings from com.github.ccaviness.pkg.elastic-agent.
+Inherits version, architecture, and Kibana settings from com.github.hudson-trading.download.elastic-agent, and enrollment settings from com.github.hudson-trading.pkg.elastic-agent.
 
 Use MUNKI_CATEGORY and MUNKI_REPO_SUBDIR to configure the Munki import.
 </string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.munki.elastic-agent</string>
+	<string>com.github.hudson-trading.munki.elastic-agent</string>
 	<key>Input</key>
 	<dict>
 		<key>DERIVE_MIN_OS</key>
@@ -54,7 +54,7 @@ exit 0
 	<key>MinimumVersion</key>
 	<string>2.7</string>
 	<key>ParentRecipe</key>
-	<string>com.github.ccaviness.pkg.elastic-agent</string>
+	<string>com.github.hudson-trading.pkg.elastic-agent</string>
 	<key>Process</key>
 	<array>
 		<dict>

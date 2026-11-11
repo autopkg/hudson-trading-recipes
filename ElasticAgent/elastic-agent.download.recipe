@@ -10,7 +10,7 @@ Queries Kibana's Fleet API for the configured download source and, unless ELASTI
 Set KIBANA_URL and either KIBANA_API_KEY or KIBANA_USERNAME/KIBANA_PASSWORD. ELASTIC_ARCH selects the 'aarch64' or 'x86_64' build and defaults to 'aarch64'.
 </string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.download.elastic-agent</string>
+	<string>com.github.hudson-trading.download.elastic-agent</string>
 	<key>Input</key>
 	<dict>
 		<key>NAME</key>
