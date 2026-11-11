@@ -7,7 +7,7 @@
 	<key>Description</key>
 	<string>Downloads the current release version of IntelliJ IDEA and imports it into Munki as a pkg.</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.munki.intellijidea</string>
+	<string>com.github.hudson-trading.munki.intellijidea</string>
 	<key>Input</key>
 	<dict>
 		<key>ARCH_TYPE</key>
@@ -47,7 +47,7 @@
 	<key>MinimumVersion</key>
 	<string>2.3</string>
 	<key>ParentRecipe</key>
-	<string>com.github.ccaviness.pkg.intellijidea</string>
+	<string>com.github.hudson-trading.pkg.intellijidea</string>
 	<key>Process</key>
 	<array>
 		<dict>

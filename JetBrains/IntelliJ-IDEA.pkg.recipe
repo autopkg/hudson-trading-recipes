@@ -7,7 +7,7 @@
 	<key>Description</key>
 	<string>Downloads the current release version of IntelliJ IDEA and creates a package.</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.pkg.intellijidea</string>
+	<string>com.github.hudson-trading.pkg.intellijidea</string>
 	<key>Input</key>
 	<dict>
 		<key>ARCH_TYPE</key>
