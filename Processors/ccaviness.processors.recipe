@@ -5,7 +5,7 @@
 	<key>Description</key>
 	<string>Patches files.</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.processors</string>
+	<string>com.github.hudson-trading.processors</string>
 	<key>Input</key>
 	<dict/>
 	<key>MinimumVersion</key>

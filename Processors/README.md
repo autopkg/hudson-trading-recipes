@@ -29,7 +29,7 @@ relocation.
         </array>
     </dict>
     <key>Processor</key>
-    <string>com.github.ccaviness.processors/XMLModifier</string>
+    <string>com.github.hudson-trading.processors/XMLModifier</string>
 </dict>
 ```
 
@@ -80,7 +80,7 @@ Using `patch_file`:
         <string>/path/to/patch.diff</string>
     </dict>
     <key>Processor</key>
-    <string>com.github.ccaviness.processors/FilePatcher</string>
+    <string>com.github.hudson-trading.processors/FilePatcher</string>
 </dict>
 ```
 
@@ -109,6 +109,6 @@ Using `patch_string`:
 </string>
     </dict>
     <key>Processor</key>
-    <string>com.github.ccaviness.processors/FilePatcher</string>
+    <string>com.github.hudson-trading.processors/FilePatcher</string>
 </dict>
 ```
