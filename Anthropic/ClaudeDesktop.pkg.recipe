@@ -9,7 +9,7 @@ The vendor-provided PKG includes a relocate element that causes macOS to install
 Claude.app wherever an existing copy is found rather than /Applications. This recipe
 avoids that by building a fresh package from the app in the DMG.</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.pkg.ClaudeDesktop</string>
+	<string>com.github.hudson-trading.pkg.ClaudeDesktop</string>
 	<key>Input</key>
 	<dict>
 		<key>NAME</key>
