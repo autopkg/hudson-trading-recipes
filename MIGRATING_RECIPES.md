@@ -24,7 +24,102 @@ scripts, icons, and other supporting files.
   They assume that the source repository uses `origin` for its GitHub remote.
   Check both repositories with `git remote -v` before starting.
 
-## 1. Import the directory and its history
+The destination clone should use this remote and branch layout:
+
+```text
+origin    https://github.com/<contributor>/hudson-trading-recipes
+upstream  https://github.com/autopkg/hudson-trading-recipes
+main      tracks origin/main
+```
+
+Disable pushes to `upstream` and make `origin` the default push remote:
+
+```bash
+git remote set-url --push upstream DISABLED
+git config remote.pushDefault origin
+git branch --set-upstream-to=origin/main main
+```
+
+## Automated workflow
+
+`scripts/recipe_migration.py` automates the history import, identifier changes,
+validation, and source deprecation. It supports XML plist and YAML recipes. It
+also migrates every supporting file in the selected directory.
+
+The script uses PyYAML when it encounters YAML recipes. AutoPkg environments
+normally provide it. If the active Python environment does not, install the
+script requirement into that environment:
+
+```bash
+python3 -m pip install -r scripts/requirements.txt
+```
+
+Run `import` without `--apply` first. The command checks both repositories and
+prints the files, commits, branch, and identifier changes without modifying
+anything:
+
+```bash
+python3 scripts/recipe_migration.py import \
+    --source-repo /path/to/source-recipes \
+    --recipe-dir RecipeName \
+    --old-namespace com.github.source-owner
+```
+
+Review the plan and the source history. Then rerun it with `--apply`:
+
+```bash
+python3 scripts/recipe_migration.py import \
+    --source-repo /path/to/source-recipes \
+    --recipe-dir RecipeName \
+    --old-namespace com.github.source-owner \
+    --apply
+```
+
+The command creates `migrate-recipe-name` from `upstream/main`, imports the
+directory history, compares the imported tree with the source, runs pre-commit
+against the migrated files, and creates separate normalization and identifier
+commits when needed. It stops without pushing and prints the review and push
+commands.
+
+After the target pull request merges, fetch `upstream` and plan the source
+deprecation:
+
+```bash
+git fetch upstream
+python3 scripts/recipe_migration.py deprecate \
+    --source-repo /path/to/source-recipes \
+    --recipe-dir RecipeName \
+    --old-namespace com.github.source-owner
+```
+
+The deprecation command confirms that every replacement identifier exists on
+`upstream/main`. Rerun it with `--apply` to create the source branch, add the
+warnings, run pre-commit, validate the exact replacement identifiers, and
+commit the changes. It does not push.
+
+Run either validation independently when reviewing an interrupted or manually
+edited migration:
+
+```bash
+python3 scripts/recipe_migration.py validate \
+    --stage target \
+    --source-repo /path/to/source-recipes \
+    --recipe-dir RecipeName \
+    --old-namespace com.github.source-owner
+
+python3 scripts/recipe_migration.py validate \
+    --stage deprecation \
+    --source-repo /path/to/source-recipes \
+    --recipe-dir RecipeName \
+    --old-namespace com.github.source-owner
+```
+
+Use the manual procedure below when resolving unusual history, shared files,
+submodules, Git LFS content, or merge-only changes.
+
+## Manual workflow
+
+### 1. Import the directory and its history
 
 Replace these placeholder values for each migration. Create a temporary
 directory for the generated patch series:
@@ -130,7 +225,7 @@ moved from another path, include each old path in the export. Do not use this
 procedure when important changes exist only in merge commits because
 `format-patch` does not reproduce those merges.
 
-## 2. Check and normalize the imported files
+### 2. Check and normalize the imported files
 
 `git am` does not run the normal pre-commit hook. Run every repository check
 explicitly before changing identifiers:
@@ -163,7 +258,7 @@ git -C "$target_repo" add "$recipe_dir"
 git -C "$target_repo" commit -m "Normalize imported $recipe_dir files"
 ```
 
-## 3. Change identifiers in the migrated copy
+### 3. Change identifiers in the migrated copy
 
 Change identifiers in a new commit after importing the history. Change each
 HRT-owned identifier from, for example:
@@ -191,7 +286,7 @@ git -C "$target_repo" add "$recipe_dir"
 git -C "$target_repo" commit -m "Use HRT identifiers for $recipe_dir recipes"
 ```
 
-## 4. Validate and publish the migrated recipes
+### 4. Validate and publish the migrated recipes
 
 Run the repository checks and review the branch:
 
@@ -215,7 +310,7 @@ not test downloads, signatures, custom processors, or Munki imports.
 Merge the destination pull request before deprecating the old recipes. The
 warning will then name a replacement that users can fetch.
 
-## 5. Deprecate the originals
+### 5. Deprecate the originals
 
 Create a separate branch in the source repository. Add `DeprecationWarning` as
 the first processor in each old recipe, with a message naming its exact
@@ -226,6 +321,11 @@ git -C "$source_repo" fetch origin
 git -C "$source_repo" switch "$source_branch"
 git -C "$source_repo" merge --ff-only "origin/$source_branch"
 git -C "$source_repo" switch -c "$deprecation_branch"
+
+(
+    cd "$source_repo"
+    pre-commit install
+)
 ```
 
 ```xml
@@ -248,11 +348,20 @@ on a separate source-repository branch:
 ```bash
 git -C "$source_repo" diff --check
 git -C "$source_repo" add "$recipe_dir"
+
+(
+    cd "$source_repo"
+    pre-commit run
+)
+
+git -C "$source_repo" status --short
+git -C "$source_repo" diff
+git -C "$source_repo" add "$recipe_dir"
 git -C "$source_repo" commit -m "Deprecate $recipe_dir recipes"
 git -C "$source_repo" push -u origin "$deprecation_branch"
 ```
 
-## 6. Update downstream consumers
+### 6. Update downstream consumers
 
 After the migration is merged:
 

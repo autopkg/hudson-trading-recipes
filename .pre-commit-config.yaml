@@ -25,3 +25,11 @@ repos:
           - id: mixed-line-ending
           - id: trailing-whitespace
             args: ["--markdown-linebreak-ext=md"]
+    - repo: local
+      hooks:
+          - id: recipe-migration-tests
+            name: Test recipe migration helper
+            entry: python3 -m unittest discover -s scripts/tests
+            language: system
+            pass_filenames: false
+            files: ^scripts/
