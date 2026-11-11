@@ -5,7 +5,7 @@
 	<key>Description</key>
 	<string>Downloads the latest version the pre-enrolled enterprise Kolide launcher. You must provide a Kolide API bearer token as `KOLIDE_TOKEN`. This is a read-only token and does not require write permissions.</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.download.Kolide</string>
+	<string>com.github.hudson-trading.download.Kolide</string>
 	<key>Input</key>
 	<dict>
 		<key>DOWNLOAD_URL</key>
