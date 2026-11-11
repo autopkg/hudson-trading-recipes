@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>Creates an installer package from the Elastic Agent archive.
+
+Inherits version, architecture, and Kibana settings from com.github.hudson-trading.download.elastic-agent.
+
+Set ELASTIC_URL and ELASTIC_ENROLLMENT_TOKEN to configure Elastic Agent enrollment.
+</string>
+	<key>Identifier</key>
+	<string>com.github.hudson-trading.pkg.elastic-agent</string>
+	<key>Input</key>
+	<dict/>
+	<key>MinimumVersion</key>
+	<string>2.3</string>
+	<key>ParentRecipe</key>
+	<string>com.github.hudson-trading.download.elastic-agent</string>
+	<key>Process</key>
+	<array>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>pattern</key>
+				<string>%pathname%</string>
+			</dict>
+			<key>Processor</key>
+			<string>FileFinder</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>pkgdirs</key>
+				<dict>
+					<key>root</key>
+					<string>0755</string>
+					<key>scripts</key>
+					<string>0755</string>
+				</dict>
+				<key>pkgroot</key>
+				<string>%RECIPE_CACHE_DIR%/elastic-agent</string>
+			</dict>
+			<key>Processor</key>
+			<string>PkgRootCreator</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>destination_path</key>
+				<string>%pkgroot%/scripts/elastic-agent.tar.gz</string>
+				<key>source_path</key>
+				<string>%pathname%</string>
+			</dict>
+			<key>Processor</key>
+			<string>Copier</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>file_content</key>
+				<string>#!/bin/bash
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" &amp;&amp; pwd)"
+ARCHIVE="${SCRIPT_DIR}/elastic-agent.tar.gz"
+TEMPDIR=$(/usr/bin/mktemp -d)
+trap 'rm -rf "${TEMPDIR}"' EXIT
+
+echo "Expanding elastic-agent archive..."
+/usr/bin/tar --directory "${TEMPDIR}" --strip-components 1 -xzf "${ARCHIVE}"
+
+echo "Installing elastic-agent..."
+"${TEMPDIR}"/elastic-agent install \
+    --force \
+    "--url=%ELASTIC_URL%" \
+    "--enrollment-token=%ELASTIC_ENROLLMENT_TOKEN%"
+
+exit 0
+</string>
+				<key>file_mode</key>
+				<string>0755</string>
+				<key>file_path</key>
+				<string>%pkgroot%/scripts/postinstall</string>
+			</dict>
+			<key>Processor</key>
+			<string>FileCreator</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>pkg_request</key>
+				<dict>
+					<key>id</key>
+					<string>co.elastic.elastic-agent</string>
+					<key>pkgname</key>
+					<string>elastic-agent-%ELASTIC_VERSION%-%ELASTIC_ARCH%</string>
+					<key>pkgroot</key>
+					<string>%pkgroot%/root</string>
+					<key>scripts</key>
+					<string>%pkgroot%/scripts</string>
+					<key>version</key>
+					<string>%ELASTIC_VERSION%</string>
+				</dict>
+			</dict>
+			<key>Processor</key>
+			<string>PkgCreator</string>
+		</dict>
+		<dict>
+			<key>Arguments</key>
+			<dict>
+				<key>path_list</key>
+				<array>
+					<string>%pkgroot%</string>
+				</array>
+			</dict>
+			<key>Processor</key>
+			<string>PathDeleter</string>
+		</dict>
+	</array>
+</dict>
+</plist>
