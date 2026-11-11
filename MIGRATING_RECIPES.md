@@ -226,13 +226,15 @@ procedure when important changes exist only in merge commits because
 
 ### 2. Check and normalize the imported files
 
-`git am` does not run the normal pre-commit hook. Run every repository check
-explicitly before changing identifiers:
+`git am` does not run the normal pre-commit hook. Run the repository checks
+before changing identifiers, but skip `check-autopkg-recipes` during this
+phase. That hook requires the new HRT namespace, which the imported files do
+not have yet:
 
 ```bash
 (
     cd "$target_repo"
-    pre-commit run --all-files
+    SKIP=check-autopkg-recipes pre-commit run --all-files
 )
 ```
 
@@ -245,7 +247,7 @@ git -C "$target_repo" diff
 
 (
     cd "$target_repo"
-    pre-commit run --all-files
+    SKIP=check-autopkg-recipes pre-commit run --all-files
 )
 ```
 
