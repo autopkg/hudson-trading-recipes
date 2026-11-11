@@ -6,7 +6,7 @@
 	<string>Downloads the latest version of WhatsApp, packages it, and imports it into Munki.
 		Based off of com.scriptingosx.munki.WhatsApp, but targets the pkg recipe instead of the download recipe.</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.munki.WhatsApp</string>
+	<string>com.github.hudson-trading.munki.WhatsApp</string>
 	<key>Input</key>
 	<dict>
 		<key>MUNKI_REPO_SUBDIR</key>
