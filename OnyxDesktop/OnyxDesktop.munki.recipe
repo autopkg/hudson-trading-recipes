@@ -5,7 +5,7 @@
 	<key>Description</key>
 	<string>Downloads the latest version of Onyx Desktop app, and imports the disk image into Munki.</string>
 	<key>Identifier</key>
-	<string>com.github.ScruffyInLondon.munki.OnyxDesktop</string>
+	<string>com.github.hudson-trading.munki.OnyxDesktop</string>
 	<key>Input</key>
 	<dict>
 		<key>MUNKI_REPO_SUBDIR</key>
@@ -31,7 +31,7 @@
 	<key>MinimumVersion</key>
 	<string>1.4</string>
 	<key>ParentRecipe</key>
-	<string>com.github.ScruffyInLondon.download.OnyxDesktop</string>
+	<string>com.github.hudson-trading.download.OnyxDesktop</string>
 	<key>Process</key>
 	<array>
 		<dict>

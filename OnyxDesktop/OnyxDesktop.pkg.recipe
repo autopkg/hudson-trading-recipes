@@ -5,13 +5,13 @@
 	<key>Description</key>
 	<string>Packages the Onyx Desktop Download.</string>
 	<key>Identifier</key>
-	<string>com.github.ScruffyInLondon.pkg.OnyxDesktop</string>
+	<string>com.github.hudson-trading.pkg.OnyxDesktop</string>
 	<key>Input</key>
 	<dict/>
 	<key>MinimumVersion</key>
 	<string>1.4</string>
 	<key>ParentRecipe</key>
-	<string>com.github.ScruffyInLondon.download.OnyxDesktop</string>
+	<string>com.github.hudson-trading.download.OnyxDesktop</string>
 	<key>Process</key>
 	<array>
 		<dict>

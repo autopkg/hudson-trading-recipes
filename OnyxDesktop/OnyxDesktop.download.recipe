@@ -5,7 +5,7 @@
 	<key>Description</key>
 	<string>Downloads the latest version of Onyx Desktop App.</string>
 	<key>Identifier</key>
-	<string>com.github.ScruffyInLondon.download.OnyxDesktop</string>
+	<string>com.github.hudson-trading.download.OnyxDesktop</string>
 	<key>Input</key>
 	<dict>
 		<key>NAME</key>
