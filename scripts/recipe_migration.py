@@ -24,7 +24,7 @@ except ImportError:  # XML migrations do not need PyYAML.
 
 NEW_NAMESPACE = "com.github.hudson-trading"
 OFFICIAL_TARGET = ("autopkg", "hudson-trading-recipes")
-RECIPE_SUFFIXES = (".recipe", ".recipe.plist", ".recipe.yaml", ".recipe.yml")
+RECIPE_SUFFIXES = (".recipe.yaml", ".recipe.yml", ".recipe.plist", ".recipe")
 
 
 class MigrationError(RuntimeError):
@@ -47,6 +47,7 @@ class MigrationPlan:
     files: tuple[PurePosixPath, ...]
     commits: tuple[str, ...]
     documents: tuple[RecipeDocument, ...]
+    old_namespace: str
     identifiers: dict[str, str]
     identifiers_by_path: dict[PurePosixPath, tuple[str, str]]
 
@@ -328,13 +329,82 @@ def documents_in_worktree(
     return tuple(documents)
 
 
+def recipe_type(path: PurePosixPath) -> str:
+    for suffix in RECIPE_SUFFIXES:
+        if path.name.endswith(suffix):
+            stem = path.name[: -len(suffix)]
+            _, separator, type_name = stem.rpartition(".")
+            if separator and type_name:
+                return type_name
+            break
+    raise MigrationError(
+        f"Cannot infer the recipe type from filename {path}. "
+        "Pass --old-namespace explicitly."
+    )
+
+
+def namespace_candidates(document: RecipeDocument) -> set[str]:
+    identifier = document.data.get("Identifier")
+    if not isinstance(identifier, str):
+        raise MigrationError(f"Recipe has no string Identifier: {document.path}")
+    type_name = recipe_type(document.path)
+    candidates: set[str] = set()
+    marker = f".{type_name}."
+    offset = 0
+    while (index := identifier.find(marker, offset)) >= 0:
+        if index:
+            candidates.add(identifier[:index])
+        offset = index + 1
+    terminal = f".{type_name}"
+    if identifier.endswith(terminal) and len(identifier) > len(terminal):
+        candidates.add(identifier[: -len(terminal)])
+    return candidates
+
+
+def infer_old_namespace(documents: Iterable[RecipeDocument]) -> str:
+    document_list = tuple(documents)
+    if not document_list:
+        raise MigrationError("No recipe files were found in the selected directory")
+    candidate_sets = tuple(namespace_candidates(document) for document in document_list)
+    details = "\n".join(
+        f"  {document.path}: {document.data.get('Identifier')}"
+        for document in document_list
+    )
+    if any(not candidates for candidates in candidate_sets):
+        raise MigrationError(
+            "Cannot infer the old namespace from a nonstandard recipe filename or "
+            "identifier. Pass --old-namespace explicitly.\n"
+            f"{details}"
+        )
+
+    shared_candidates = set.intersection(*candidate_sets)
+    if len(shared_candidates) == 1:
+        namespace = shared_candidates.pop()
+        if namespace == NEW_NAMESPACE:
+            raise MigrationError(
+                f"Source recipes already use the target namespace {NEW_NAMESPACE}"
+            )
+        return namespace
+    if not shared_candidates:
+        raise MigrationError(
+            "Recipes do not share one old namespace. Migrate each namespace "
+            f"separately.\n{details}"
+        )
+    raise MigrationError(
+        f"The old namespace is ambiguous. Pass --old-namespace explicitly.\n{details}"
+    )
+
+
 def identifier_mapping(
-    documents: Iterable[RecipeDocument], old_namespace: str
+    documents: Iterable[RecipeDocument], old_namespace: str | None
 ) -> tuple[dict[str, str], dict[PurePosixPath, tuple[str, str]]]:
+    document_list = tuple(documents)
+    if old_namespace is None:
+        old_namespace = infer_old_namespace(document_list)
     identifiers: dict[str, str] = {}
     identifiers_by_path: dict[PurePosixPath, tuple[str, str]] = {}
     prefix = f"{old_namespace}."
-    for document in documents:
+    for document in document_list:
         identifier = document.data.get("Identifier")
         if not isinstance(identifier, str):
             raise MigrationError(f"Recipe has no string Identifier: {document.path}")
@@ -370,17 +440,25 @@ def build_plan(
     source_repo: Path,
     source_ref: str,
     recipe_dir: PurePosixPath,
-    old_namespace: str,
+    old_namespace: str | None,
 ) -> MigrationPlan:
     files = files_at_ref(source_repo, source_ref, recipe_dir)
     if not files:
         raise MigrationError(f"No tracked files found at {source_ref}:{recipe_dir}")
     documents = documents_at_ref(source_repo, source_ref, files)
-    identifiers, identifiers_by_path = identifier_mapping(documents, old_namespace)
+    resolved_namespace = old_namespace or infer_old_namespace(documents)
+    identifiers, identifiers_by_path = identifier_mapping(documents, resolved_namespace)
     commits = commits_at_ref(source_repo, source_ref, recipe_dir)
     if not commits:
         raise MigrationError(f"No commits found for {source_ref}:{recipe_dir}")
-    return MigrationPlan(files, commits, documents, identifiers, identifiers_by_path)
+    return MigrationPlan(
+        files,
+        commits,
+        documents,
+        resolved_namespace,
+        identifiers,
+        identifiers_by_path,
+    )
 
 
 def print_plan(
@@ -402,6 +480,7 @@ def print_plan(
     print(f"files: {len(plan.files)}")
     print(f"recipes: {len(plan.documents)}")
     print(f"commits: {len(plan.commits)}")
+    print(f"old_namespace: {plan.old_namespace}")
     print("file_list:")
     for path in plan.files:
         print(f"  {path}")
@@ -805,8 +884,7 @@ def import_command(args: argparse.Namespace) -> None:
     validate_remotes(args.source_repo, args.target_repo)
     require_clean(args.source_repo, "Source")
     require_clean(args.target_repo, "Target")
-    if args.apply:
-        fetch_repositories(args.source_repo, args.target_repo)
+    fetch_repositories(args.source_repo, args.target_repo)
 
     source_ref = f"origin/{args.source_branch}"
     target_ref = f"upstream/{args.target_branch}"
@@ -827,7 +905,7 @@ def import_command(args: argparse.Namespace) -> None:
         operation="import",
     )
     if not args.apply:
-        print("result: no changes (rerun with --apply)")
+        print("result: no worktree changes (rerun with --apply)")
         return
     apply_import(args, plan)
 
@@ -857,8 +935,7 @@ def deprecate_command(args: argparse.Namespace) -> None:
     validate_remotes(args.source_repo, args.target_repo)
     require_clean(args.source_repo, "Source")
     require_clean(args.target_repo, "Target")
-    if args.apply:
-        fetch_repositories(args.source_repo, args.target_repo)
+    fetch_repositories(args.source_repo, args.target_repo)
 
     source_ref = f"origin/{args.source_branch}"
     target_ref = f"upstream/{args.target_branch}"
@@ -875,7 +952,7 @@ def deprecate_command(args: argparse.Namespace) -> None:
         operation="deprecate",
     )
     if not args.apply:
-        print("result: no changes (rerun with --apply)")
+        print("result: no worktree changes (rerun with --apply)")
         return
 
     require_absent_branch(args.source_repo, branch)
@@ -952,8 +1029,10 @@ def add_common_arguments(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--old-namespace",
-        required=True,
-        help="source identifier namespace, for example com.github.ccaviness",
+        help=(
+            "source identifier namespace; inferred from recipe filenames and "
+            "identifiers when omitted"
+        ),
     )
     parser.add_argument("--source-branch", default="main")
     parser.add_argument("--target-branch", default="main")
@@ -971,7 +1050,7 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""Examples:
   %(prog)s --source-repo /path/to/source-recipes \\
-    --recipe-dir Cyberhaven --old-namespace com.github.ccaviness
+    --recipe-dir Cyberhaven
 
   %(prog)s --source-repo /path/to/source-recipes \\
     --recipe-dir 'Okta Verify' --old-namespace com.github.owner --apply
@@ -982,7 +1061,9 @@ def build_parser() -> argparse.ArgumentParser:
     import_parser.add_argument(
         "--apply",
         action="store_true",
-        help="create the branch and commits; otherwise only print the plan",
+        help=(
+            "create the branch and commits; otherwise fetch remotes and print the plan"
+        ),
     )
     import_parser.set_defaults(function=import_command)
 
@@ -992,10 +1073,10 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""Examples:
   %(prog)s --source-repo /path/to/source-recipes \\
-    --recipe-dir Cyberhaven --old-namespace com.github.ccaviness
+    --recipe-dir Cyberhaven
 
   %(prog)s --source-repo /path/to/source-recipes \\
-    --recipe-dir Cyberhaven --old-namespace com.github.ccaviness --apply
+    --recipe-dir Cyberhaven --apply
 """,
     )
     add_common_arguments(deprecate_parser)
@@ -1003,7 +1084,9 @@ def build_parser() -> argparse.ArgumentParser:
     deprecate_parser.add_argument(
         "--apply",
         action="store_true",
-        help="create the branch and commit; otherwise only print the plan",
+        help=(
+            "create the branch and commit; otherwise fetch remotes and print the plan"
+        ),
     )
     deprecate_parser.set_defaults(function=deprecate_command)
 
@@ -1013,10 +1096,10 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""Examples:
   %(prog)s --stage target --source-repo /path/to/source-recipes \\
-    --recipe-dir Cyberhaven --old-namespace com.github.ccaviness
+    --recipe-dir Cyberhaven
 
   %(prog)s --stage deprecation --source-repo /path/to/source-recipes \\
-    --recipe-dir Cyberhaven --old-namespace com.github.ccaviness
+    --recipe-dir Cyberhaven
 """,
     )
     add_common_arguments(validate_parser)

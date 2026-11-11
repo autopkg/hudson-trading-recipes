@@ -54,6 +54,14 @@ def plist_recipe(identifier: str, parent: str | None = None) -> bytes:
     return plistlib.dumps(recipe, sort_keys=False)
 
 
+def recipe_document(filename: str, identifier: str) -> migration.RecipeDocument:
+    return migration.RecipeDocument(
+        path=PurePosixPath("Example") / filename,
+        data={"Identifier": identifier, "Process": []},
+        format="yaml" if filename.endswith((".yaml", ".yml")) else "plist",
+    )
+
+
 class GitHubRemoteTests(unittest.TestCase):
     def test_logical_absolute_preserves_pwd(self) -> None:
         with mock.patch.dict("os.environ", {"PWD": "/home/clay/src/packaging"}):
@@ -148,6 +156,90 @@ class GitHubRemoteTests(unittest.TestCase):
 
             with self.assertRaises(migration.MigrationError):
                 migration.validate_remotes(source, target)
+
+
+class NamespaceInferenceTests(unittest.TestCase):
+    def test_infers_shared_namespace_from_recipe_types(self) -> None:
+        documents = (
+            recipe_document("Example.download.recipe", OLD_DOWNLOAD),
+            recipe_document("Example.munki.recipe", OLD_MUNKI),
+            recipe_document("Example.pkg.recipe.yaml", f"{OLD_NAMESPACE}.pkg.Example"),
+        )
+
+        self.assertEqual(migration.infer_old_namespace(documents), OLD_NAMESPACE)
+
+    def test_rejects_mixed_namespaces(self) -> None:
+        documents = (
+            recipe_document("Example.download.recipe", OLD_DOWNLOAD),
+            recipe_document(
+                "Example.munki.recipe", "com.github.someone-else.munki.Example"
+            ),
+        )
+
+        with self.assertRaisesRegex(
+            migration.MigrationError, "Migrate each namespace separately"
+        ):
+            migration.infer_old_namespace(documents)
+
+    def test_rejects_ambiguous_single_identifier(self) -> None:
+        document = recipe_document(
+            "Example.download.recipe",
+            "com.download.example.download.Example",
+        )
+
+        with self.assertRaisesRegex(
+            migration.MigrationError, "Pass --old-namespace explicitly"
+        ):
+            migration.infer_old_namespace((document,))
+        identifiers, _ = migration.identifier_mapping(
+            (document,), "com.download.example"
+        )
+        expected_identifier = "com.github.hudson-trading.download.Example"
+        self.assertEqual(
+            identifiers,
+            {"com.download.example.download.Example": expected_identifier},
+        )
+
+    def test_old_namespace_option_is_optional(self) -> None:
+        arguments = migration.build_parser().parse_args(
+            [
+                "import",
+                "--source-repo",
+                "/path/to/source-recipes",
+                "--recipe-dir",
+                "Example",
+            ]
+        )
+
+        self.assertIsNone(arguments.old_namespace)
+
+
+class CommandBehaviorTests(unittest.TestCase):
+    def test_planning_commands_fetch_before_reading_refs(self) -> None:
+        arguments = argparse.Namespace(
+            source_repo=Path("/source"),
+            target_repo=Path("/target"),
+            recipe_dir=PurePosixPath("Example"),
+            old_namespace=None,
+            source_branch="main",
+            target_branch="main",
+            branch=None,
+            apply=False,
+        )
+        for command in (migration.import_command, migration.deprecate_command):
+            with self.subTest(command=command.__name__):
+                with (
+                    mock.patch.object(migration, "validate_remotes"),
+                    mock.patch.object(migration, "require_clean"),
+                    mock.patch.object(
+                        migration,
+                        "fetch_repositories",
+                        side_effect=migration.MigrationError("fetch called"),
+                    ) as fetch,
+                    self.assertRaisesRegex(migration.MigrationError, "fetch called"),
+                ):
+                    command(arguments)
+                fetch.assert_called_once_with(Path("/source"), Path("/target"))
 
 
 class RecipeEditingTests(unittest.TestCase):
@@ -330,9 +422,8 @@ class ImportIntegrationTests(unittest.TestCase):
             )
 
             recipe_dir = PurePosixPath("Example")
-            plan = migration.build_plan(
-                source, "origin/main", recipe_dir, OLD_NAMESPACE
-            )
+            plan = migration.build_plan(source, "origin/main", recipe_dir, None)
+            self.assertEqual(plan.old_namespace, OLD_NAMESPACE)
             args = argparse.Namespace(
                 source_repo=source,
                 target_repo=target,
