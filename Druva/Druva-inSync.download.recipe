@@ -5,7 +5,7 @@
 	<key>Description</key>
 	<string>Downloads the latest version of the Druva inSync client.</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.download.Druva-inSync</string>
+	<string>com.github.hudson-trading.download.Druva-inSync</string>
 	<key>Input</key>
 	<dict>
 		<key>NAME</key>

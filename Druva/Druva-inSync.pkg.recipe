@@ -11,7 +11,7 @@
 
         See https://help.druva.com/en/articles/8702687-customize-insync-client-for-mac-devices</string>
 	<key>Identifier</key>
-	<string>com.github.ccaviness.pkg.Druva-inSync</string>
+	<string>com.github.hudson-trading.pkg.Druva-inSync</string>
 	<key>Input</key>
 	<dict>
 		<key>INSYNC_CUSTOMIZATION_JSON</key>
@@ -20,7 +20,7 @@
 	<key>MinimumVersion</key>
 	<string>2.3</string>
 	<key>ParentRecipe</key>
-	<string>com.github.ccaviness.download.Druva-inSync</string>
+	<string>com.github.hudson-trading.download.Druva-inSync</string>
 	<key>Process</key>
 	<array>
 		<dict>
