@@ -54,16 +54,20 @@ script requirement into that environment:
 python3 -m pip install -r scripts/requirements.txt
 ```
 
-Run `import` without `--apply` first. The command checks both repositories and
-prints the files, commits, branch, and identifier changes without modifying
-anything:
+Run `import` without `--apply` first. The command checks both repositories,
+fetches their remotes, and prints the files, commits, branch, and identifier
+changes. It does not change either worktree or create commits:
 
 ```bash
 python3 scripts/recipe_migration.py import \
     --source-repo /path/to/source-recipes \
-    --recipe-dir RecipeName \
-    --old-namespace com.github.source-owner
+    --recipe-dir RecipeName
 ```
+
+The script normally infers the old namespace from each recipe's filename and
+`Identifier`. Every recipe in the directory must produce the same namespace.
+For nonstandard or ambiguous identifiers, provide it explicitly with
+`--old-namespace com.github.source-owner`.
 
 Review the plan and the source history. Then rerun it with `--apply`:
 
@@ -71,7 +75,6 @@ Review the plan and the source history. Then rerun it with `--apply`:
 python3 scripts/recipe_migration.py import \
     --source-repo /path/to/source-recipes \
     --recipe-dir RecipeName \
-    --old-namespace com.github.source-owner \
     --apply
 ```
 
@@ -81,15 +84,13 @@ against the migrated files, and creates separate normalization and identifier
 commits when needed. It stops without pushing and prints the review and push
 commands.
 
-After the target pull request merges, fetch `upstream` and plan the source
-deprecation:
+After the target pull request merges, plan the source deprecation. The command
+fetches `upstream` before confirming that the replacement recipes exist:
 
 ```bash
-git fetch upstream
 python3 scripts/recipe_migration.py deprecate \
     --source-repo /path/to/source-recipes \
-    --recipe-dir RecipeName \
-    --old-namespace com.github.source-owner
+    --recipe-dir RecipeName
 ```
 
 The deprecation command confirms that every replacement identifier exists on
@@ -104,14 +105,12 @@ edited migration:
 python3 scripts/recipe_migration.py validate \
     --stage target \
     --source-repo /path/to/source-recipes \
-    --recipe-dir RecipeName \
-    --old-namespace com.github.source-owner
+    --recipe-dir RecipeName
 
 python3 scripts/recipe_migration.py validate \
     --stage deprecation \
     --source-repo /path/to/source-recipes \
-    --recipe-dir RecipeName \
-    --old-namespace com.github.source-owner
+    --recipe-dir RecipeName
 ```
 
 Use the manual procedure below when resolving unusual history, shared files,
