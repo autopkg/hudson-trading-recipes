@@ -5,7 +5,7 @@
 	<key>Description</key>
 	<string>Downloads the latest version of the kitty app, packages it from com.github.apizz.pkg.Kitty, and imports into Munki.</string>
 	<key>Identifier</key>
-	<string>com.github.ScruffyInLondon.munki.kitty-pkg</string>
+	<string>com.github.hudson-trading.munki.kitty-pkg</string>
 	<key>Input</key>
 	<dict>
 		<key>MUNKI_REPO_SUBDIR</key>
