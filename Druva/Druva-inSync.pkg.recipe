@@ -74,7 +74,7 @@
 				<string>%found_filename%/Scripts/postinstall</string>
 			</dict>
 			<key>Processor</key>
-			<string>com.github.ccaviness.processors/FilePatcher</string>
+			<string>com.github.hudson-trading.processors/FilePatcher</string>
 		</dict>
 		<dict>
 			<key>Arguments</key>
