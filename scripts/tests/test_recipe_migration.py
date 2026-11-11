@@ -41,9 +41,11 @@ def init_repo(path: Path) -> None:
     run_git(path, "config", "user.email", "recipe-migration@example.com")
 
 
-def plist_recipe(identifier: str, parent: str | None = None) -> bytes:
+def plist_recipe(
+    identifier: str, parent: str | None = None, description: str = "Example"
+) -> bytes:
     recipe = {
-        "Description": "Example",
+        "Description": description,
         "Identifier": identifier,
         "Input": {"NAME": "Example"},
         "MinimumVersion": "2.3",
@@ -242,6 +244,34 @@ class CommandBehaviorTests(unittest.TestCase):
                 fetch.assert_called_once_with(Path("/source"), Path("/target"))
 
 
+class PreCommitTests(unittest.TestCase):
+    def test_skip_hooks_are_scoped_to_one_run(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary)
+            (repo / ".pre-commit-config.yaml").write_text(
+                "repos: []\n", encoding="utf-8"
+            )
+            files = (PurePosixPath("Example/Example.download.recipe"),)
+            completed = subprocess.CompletedProcess(args=("pre-commit",), returncode=0)
+            with (
+                mock.patch.object(migration, "git", return_value=""),
+                mock.patch.object(migration, "run", return_value=completed) as run,
+            ):
+                migration.run_pre_commit(
+                    repo,
+                    files,
+                    PurePosixPath("Example"),
+                    skip_hooks=("check-autopkg-recipes",),
+                )
+                self.assertEqual(
+                    run.call_args.kwargs["environment"],
+                    {"SKIP": "check-autopkg-recipes"},
+                )
+
+                migration.run_pre_commit(repo, files, PurePosixPath("Example"))
+                self.assertEqual(run.call_args.kwargs["environment"], {"SKIP": ""})
+
+
 class RecipeEditingTests(unittest.TestCase):
     def test_xml_identifier_rewrite_and_deprecation(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -251,8 +281,16 @@ class RecipeEditingTests(unittest.TestCase):
             directory.mkdir()
             download = directory / "Example.download.recipe"
             munki = directory / "Example.munki.recipe"
+            readme = directory / "README.md"
             download.write_bytes(plist_recipe(OLD_DOWNLOAD))
-            munki.write_bytes(plist_recipe(OLD_MUNKI, OLD_DOWNLOAD))
+            munki.write_bytes(
+                plist_recipe(
+                    OLD_MUNKI,
+                    OLD_DOWNLOAD,
+                    description=f"Inherits from {OLD_DOWNLOAD}.",
+                )
+            )
+            readme.write_text(f"Parent: {OLD_DOWNLOAD}\n", encoding="utf-8")
             identifiers = {OLD_DOWNLOAD: NEW_DOWNLOAD, OLD_MUNKI: NEW_MUNKI}
 
             migration.rewrite_identifiers(root, recipe_dir, identifiers)
@@ -262,6 +300,13 @@ class RecipeEditingTests(unittest.TestCase):
             self.assertEqual(rewritten_download["Identifier"], NEW_DOWNLOAD)
             self.assertEqual(rewritten_munki["Identifier"], NEW_MUNKI)
             self.assertEqual(rewritten_munki["ParentRecipe"], NEW_DOWNLOAD)
+            self.assertEqual(
+                rewritten_munki["Description"],
+                f"Inherits from {NEW_DOWNLOAD}.",
+            )
+            self.assertEqual(
+                readme.read_text(encoding="utf-8"), f"Parent: {NEW_DOWNLOAD}\n"
+            )
 
             download.write_bytes(plist_recipe(OLD_DOWNLOAD))
             munki.write_bytes(plist_recipe(OLD_MUNKI, OLD_DOWNLOAD))
@@ -433,7 +478,22 @@ class ImportIntegrationTests(unittest.TestCase):
                 branch="migrate-example",
             )
 
-            migration.apply_import(args, plan)
+            with mock.patch.object(migration, "run_pre_commit") as pre_commit:
+                migration.apply_import(args, plan)
+
+            migrated_files = (PurePosixPath("Example/Example.download.recipe"),)
+            self.assertEqual(
+                pre_commit.call_args_list,
+                [
+                    mock.call(
+                        target,
+                        migrated_files,
+                        recipe_dir,
+                        skip_hooks=("check-autopkg-recipes",),
+                    ),
+                    mock.call(target, migrated_files, recipe_dir),
+                ],
+            )
 
             migrated = plistlib.loads(
                 (target / "Example" / "Example.download.recipe").read_bytes()

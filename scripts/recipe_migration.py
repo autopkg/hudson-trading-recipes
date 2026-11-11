@@ -10,7 +10,7 @@ import re
 import subprocess
 import sys
 import tempfile
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -58,9 +58,13 @@ def run(
     cwd: Path | None = None,
     check: bool = True,
     capture: bool = True,
+    environment: Mapping[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Run a command with predictable text output."""
 
+    command_environment = os.environ.copy()
+    if environment:
+        command_environment.update(environment)
     result = subprocess.run(
         command,
         cwd=cwd,
@@ -68,6 +72,7 @@ def run(
         text=True,
         stdout=subprocess.PIPE if capture else None,
         stderr=subprocess.PIPE if capture else None,
+        env=command_environment,
     )
     if check and result.returncode:
         rendered = " ".join(command)
@@ -556,7 +561,11 @@ def require_changes_within(
 
 
 def run_pre_commit(
-    repo: Path, files: Iterable[PurePosixPath], recipe_dir: PurePosixPath
+    repo: Path,
+    files: Iterable[PurePosixPath],
+    recipe_dir: PurePosixPath,
+    *,
+    skip_hooks: Iterable[str] = (),
 ) -> None:
     if not (repo / ".pre-commit-config.yaml").exists():
         print(f"pre_commit: skipped (no configuration in {repo})")
@@ -564,6 +573,7 @@ def run_pre_commit(
     file_arguments = [str(path) for path in files]
     if not file_arguments:
         return
+    skip_value = ",".join(skip_hooks)
     for attempt in range(3):
         before = git(repo, "diff", "--binary")
         result = run(
@@ -571,6 +581,7 @@ def run_pre_commit(
             cwd=repo,
             check=False,
             capture=False,
+            environment={"SKIP": skip_value},
         )
         require_changes_within(repo, recipe_dir)
         if result.returncode == 0:
@@ -578,9 +589,11 @@ def run_pre_commit(
             return
         after = git(repo, "diff", "--binary")
         if before == after or attempt == 2:
+            skip_prefix = f"SKIP={skip_value} " if skip_value else ""
             raise MigrationError(
                 "pre-commit failed without a fixable formatting change. "
-                f"Run: cd {repo} && pre-commit run --files " + " ".join(file_arguments)
+                f"Run: cd {repo} && {skip_prefix}pre-commit run --files "
+                + " ".join(file_arguments)
             )
         print("pre_commit: hooks modified files; rerunning")
 
@@ -588,20 +601,6 @@ def run_pre_commit(
 def commit_directory(repo: Path, recipe_dir: PurePosixPath, message: str) -> None:
     git(repo, "add", "--", str(recipe_dir))
     git(repo, "commit", "-m", message)
-
-
-def replace_yaml_scalar(text: str, node: Any, replacement: str) -> str:
-    start = node.start_mark.index
-    end = node.end_mark.index
-    original = text[start:end]
-    if len(original) >= 2 and original[0] == original[-1] and original[0] in "\"'":
-        quote = original[0]
-        if quote == '"':
-            replacement = replacement.replace("\\", "\\\\").replace('"', '\\"')
-        else:
-            replacement = replacement.replace("'", "''")
-        replacement = f"{quote}{replacement}{quote}"
-    return f"{text[:start]}{replacement}{text[end:]}"
 
 
 def top_level_yaml_nodes(text: str) -> dict[str, Any]:
@@ -616,39 +615,49 @@ def top_level_yaml_nodes(text: str) -> dict[str, Any]:
     }
 
 
-def rewrite_yaml_identifiers(path: Path, identifiers: dict[str, str]) -> None:
-    text = path.read_text(encoding="utf-8")
-    nodes = top_level_yaml_nodes(text)
-    replacements: list[tuple[Any, str]] = []
-    for key in ("Identifier", "ParentRecipe"):
-        node = nodes.get(key)
-        if node is not None and node.value in identifiers:
-            replacements.append((node, identifiers[node.value]))
-    for node, replacement in sorted(
-        replacements, key=lambda item: item[0].start_mark.index, reverse=True
-    ):
-        text = replace_yaml_scalar(text, node, replacement)
-    path.write_text(text, encoding="utf-8")
-
-
 def rewrite_identifiers(
     target_repo: Path,
     recipe_dir: PurePosixPath,
     identifiers: dict[str, str],
 ) -> None:
-    for document in documents_in_worktree(target_repo, recipe_dir):
-        path = target_repo / Path(*document.path.parts)
-        if document.format == "yaml":
-            rewrite_yaml_identifiers(path, identifiers)
+    base = target_repo / Path(*recipe_dir.parts)
+    for path in sorted(base.rglob("*")):
+        if not path.is_file() or path.is_symlink():
             continue
-        data = document.data
-        identifier = data.get("Identifier")
-        if identifier in identifiers:
-            data["Identifier"] = identifiers[identifier]
-        parent = data.get("ParentRecipe")
-        if parent in identifiers:
-            data["ParentRecipe"] = identifiers[parent]
-        path.write_bytes(plistlib.dumps(data, sort_keys=False))
+        content = path.read_bytes()
+        try:
+            text = content.decode("utf-8")
+        except UnicodeDecodeError:
+            continue
+        rewritten = text
+        for old_identifier, new_identifier in identifiers.items():
+            rewritten = rewritten.replace(old_identifier, new_identifier)
+        if rewritten != text:
+            path.write_bytes(rewritten.encode("utf-8"))
+
+
+def validate_no_old_identifiers(
+    repo: Path,
+    recipe_dir: PurePosixPath,
+    identifiers: dict[str, str],
+) -> None:
+    base = repo / Path(*recipe_dir.parts)
+    errors = []
+    for path in sorted(base.rglob("*")):
+        if not path.is_file() or path.is_symlink():
+            continue
+        try:
+            text = path.read_bytes().decode("utf-8")
+        except UnicodeDecodeError:
+            continue
+        for old_identifier in identifiers:
+            if old_identifier in text:
+                relative = path.relative_to(repo)
+                errors.append(f"{relative}: {old_identifier}")
+    if errors:
+        raise MigrationError(
+            "Old migrated identifiers remain in text files:\n  " + "\n  ".join(errors)
+        )
 
 
 def validate_target_documents(
@@ -848,7 +857,12 @@ def apply_import(args: argparse.Namespace, plan: MigrationPlan) -> None:
     print("tree_comparison: exact match")
 
     migrated_files = files_at_ref(target_repo, "HEAD", recipe_dir)
-    run_pre_commit(target_repo, migrated_files, recipe_dir)
+    run_pre_commit(
+        target_repo,
+        migrated_files,
+        recipe_dir,
+        skip_hooks=("check-autopkg-recipes",),
+    )
     if changed_paths(target_repo):
         commit_directory(
             target_repo,
@@ -857,6 +871,7 @@ def apply_import(args: argparse.Namespace, plan: MigrationPlan) -> None:
         )
 
     rewrite_identifiers(target_repo, recipe_dir, plan.identifiers)
+    validate_no_old_identifiers(target_repo, recipe_dir, plan.identifiers)
     target_documents = documents_in_worktree(target_repo, recipe_dir)
     validate_target_documents(
         target_documents,
@@ -988,6 +1003,7 @@ def validate_command(args: argparse.Namespace) -> None:
     source_ref = f"origin/{args.source_branch}"
     plan = build_plan(args.source_repo, source_ref, args.recipe_dir, args.old_namespace)
     if args.stage == "target":
+        validate_no_old_identifiers(args.target_repo, args.recipe_dir, plan.identifiers)
         validate_target_documents(
             documents_in_worktree(args.target_repo, args.recipe_dir),
             plan.documents,
