@@ -5,7 +5,7 @@
 	<key>Description</key>
 	<string>Downloads the latest VoiceInk disk image and imports into Munki.</string>
 	<key>Identifier</key>
-	<string>com.github.ScruffyInLondon.munki.VoiceInk</string>
+	<string>com.github.hudson-trading.munki.VoiceInk</string>
 	<key>Input</key>
 	<dict>
 		<key>MUNKI_REPO_SUBDIR</key>
@@ -31,7 +31,7 @@
 	<key>MinimumVersion</key>
 	<string>1.4</string>
 	<key>ParentRecipe</key>
-	<string>com.github.ScruffyInLondon.download.VoiceInk</string>
+	<string>com.github.hudson-trading.download.VoiceInk</string>
 	<key>Process</key>
 	<array>
 		<dict>

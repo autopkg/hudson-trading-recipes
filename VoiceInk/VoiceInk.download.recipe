@@ -5,7 +5,7 @@
 	<key>Description</key>
 	<string>Downloads the latest version of VoiceInk.</string>
 	<key>Identifier</key>
-	<string>com.github.ScruffyInLondon.download.VoiceInk</string>
+	<string>com.github.hudson-trading.download.VoiceInk</string>
 	<key>Input</key>
 	<dict>
 		<key>NAME</key>

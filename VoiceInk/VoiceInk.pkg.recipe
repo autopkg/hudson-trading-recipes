@@ -5,13 +5,13 @@
 	<key>Description</key>
 	<string>Packages the VoiceInk Download.</string>
 	<key>Identifier</key>
-	<string>com.github.ScruffyInLondon.pkg.VoiceInk</string>
+	<string>com.github.hudson-trading.pkg.VoiceInk</string>
 	<key>Input</key>
 	<dict/>
 	<key>MinimumVersion</key>
 	<string>1.4</string>
 	<key>ParentRecipe</key>
-	<string>com.github.ScruffyInLondon.download.VoiceInk</string>
+	<string>com.github.hudson-trading.download.VoiceInk</string>
 	<key>Process</key>
 	<array>
 		<dict>
